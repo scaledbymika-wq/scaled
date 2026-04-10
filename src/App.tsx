@@ -9,6 +9,7 @@ import UpdateDialog from "./components/UpdateDialog";
 import { useTheme } from "./lib/theme";
 import {
   getNotes,
+  getNotesForWorkspace,
   getFavorites,
   getTrashed,
   searchNotes,
@@ -18,7 +19,11 @@ import {
   restoreNote,
   permanentlyDelete,
   toggleFavorite,
+  getWorkspaces,
+  createWorkspace,
+  deleteWorkspace,
   type Note,
+  type Workspace,
 } from "./lib/storage";
 
 export default function App() {
@@ -29,16 +34,24 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [activeWorkspace, setActiveWorkspace] = useState("all");
+  const [activeWorkspace, setActiveWorkspace] = useState("");
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const { settings } = useTheme();
 
   const refresh = useCallback(() => {
     const q = searchQuery.trim();
-    setNotes(q ? searchNotes(q) : getNotes());
+    if (q) {
+      setNotes(searchNotes(q));
+    } else if (activeWorkspace) {
+      setNotes(getNotesForWorkspace(activeWorkspace));
+    } else {
+      setNotes(getNotes());
+    }
     setFavorites(getFavorites());
     setTrashedNotes(getTrashed());
-  }, [searchQuery]);
+    setWorkspaces(getWorkspaces());
+  }, [searchQuery, activeWorkspace]);
 
   useEffect(() => {
     refresh();
@@ -49,6 +62,7 @@ export default function App() {
     if (loaded.length > 0 && !activeId) {
       setActiveId(loaded[0].id);
     }
+    setWorkspaces(getWorkspaces());
   }, []);
 
   const activeNote =
@@ -61,12 +75,11 @@ export default function App() {
 
   const handleTemplateSelect = useCallback(
     (template: Template) => {
-      const note = createNote();
+      const note = createNote(null, activeWorkspace);
       if (template.defaultTitle || template.content) {
         updateNote(note.id, {
           title: template.defaultTitle,
           content: template.content,
-          icon: template.icon,
         });
       }
       setSearchQuery("");
@@ -74,7 +87,7 @@ export default function App() {
       refresh();
       setActiveId(note.id);
     },
-    [refresh]
+    [refresh, activeWorkspace]
   );
 
   const handleDelete = useCallback(
@@ -159,6 +172,31 @@ export default function App() {
     [activeId, refresh]
   );
 
+  const handleCreateWorkspace = useCallback(
+    (name: string) => {
+      createWorkspace(name);
+      refresh();
+    },
+    [refresh]
+  );
+
+  const handleDeleteWorkspace = useCallback(
+    (id: string) => {
+      deleteWorkspace(id);
+      if (activeWorkspace === id) setActiveWorkspace("");
+      refresh();
+    },
+    [activeWorkspace, refresh]
+  );
+
+  const handleAssignWorkspace = useCallback(
+    (noteId: string, workspaceId: string) => {
+      updateNote(noteId, { workspace: workspaceId });
+      refresh();
+    },
+    [refresh]
+  );
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -206,6 +244,10 @@ export default function App() {
         onOpenSettings={() => setShowSettings(true)}
         activeWorkspace={activeWorkspace}
         onWorkspaceChange={setActiveWorkspace}
+        workspaces={workspaces}
+        onCreateWorkspace={handleCreateWorkspace}
+        onDeleteWorkspace={handleDeleteWorkspace}
+        onAssignWorkspace={handleAssignWorkspace}
       />
 
       <main className="flex-1 h-full relative" style={{ backgroundColor: "var(--bg-primary)" }}>
@@ -238,7 +280,7 @@ export default function App() {
         {/* Word Count Bar */}
         {activeNote && settings.showWordCount && (
           <div
-            className="absolute bottom-0 right-0 px-4 py-2 text-[11px] font-mono"
+            className="absolute bottom-0 right-0 px-4 py-2 text-[11px] font-mono tabular-nums"
             style={{ color: "var(--text-muted)" }}
           >
             {wordCount} {wordCount === 1 ? "word" : "words"}

@@ -1,24 +1,14 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import type { Note } from "../lib/storage";
+import { useState, useRef } from "react";
+import type { Note, Workspace } from "../lib/storage";
 import { useTheme } from "../lib/theme";
+import {
+  IconSearch, IconPlus, IconChevron, IconSettings, IconSun, IconMoon,
+  IconStar, IconStarFilled, IconTrash, IconPage, IconPages,
+  IconFolder, IconFolderPlus, IconX, IconRestore, IconPen,
+} from "./Icons";
 
 type SidebarView = "pages" | "trash";
-
-export interface Workspace {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-}
-
-export const DEFAULT_WORKSPACES: Workspace[] = [
-  { id: "all", name: "All Pages", icon: "\ud83d\udcc4", color: "#a1a1aa" },
-  { id: "projects", name: "Projects", icon: "\ud83d\ude80", color: "#10b981" },
-  { id: "finance", name: "Finance", icon: "\ud83d\udcb0", color: "#f59e0b" },
-  { id: "journal", name: "Journal", icon: "\ud83d\udcdd", color: "#8b5cf6" },
-  { id: "ideas", name: "Ideas", icon: "\ud83d\udca1", color: "#3b82f6" },
-];
 
 interface SidebarProps {
   notes: Note[];
@@ -36,6 +26,10 @@ interface SidebarProps {
   onOpenSettings: () => void;
   activeWorkspace: string;
   onWorkspaceChange: (id: string) => void;
+  workspaces: Workspace[];
+  onCreateWorkspace: (name: string) => void;
+  onDeleteWorkspace: (id: string) => void;
+  onAssignWorkspace: (noteId: string, workspaceId: string) => void;
 }
 
 function formatDate(ts: number) {
@@ -48,34 +42,40 @@ function CollapsibleSection({
   defaultOpen = true,
   count,
   children,
+  action,
 }: {
   title: string;
   defaultOpen?: boolean;
   count?: number;
   children: React.ReactNode;
+  action?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="mb-2">
+    <div className="mb-1">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-1.5 px-3 py-1.5 cursor-default group"
       >
-        <motion.span
+        <motion.div
           animate={{ rotate: open ? 90 : 0 }}
           transition={{ duration: 0.15 }}
-          className="text-[10px]"
           style={{ color: "var(--text-muted)" }}
         >
-          {"\u25b6"}
-        </motion.span>
-        <span className="text-[10px] font-mono tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+          <IconChevron size={10} />
+        </motion.div>
+        <span className="text-[10px] font-sans tracking-[0.12em] uppercase font-medium" style={{ color: "var(--text-muted)" }}>
           {title}
         </span>
         {count !== undefined && (
-          <span className="text-[10px] ml-auto" style={{ color: "var(--text-muted)" }}>
+          <span className="text-[10px] ml-auto tabular-nums" style={{ color: "var(--text-muted)" }}>
             {count}
+          </span>
+        )}
+        {action && (
+          <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+            {action}
           </span>
         )}
       </button>
@@ -128,31 +128,30 @@ function NoteItem({
         {note.icon ? (
           <span className="text-sm flex-shrink-0">{note.icon}</span>
         ) : (
-          <span
-            className="w-4 h-4 rounded flex-shrink-0"
-            style={{ backgroundColor: "var(--bg-tertiary)" }}
-          />
+          <span style={{ color: "var(--text-muted)" }} className="flex-shrink-0">
+            <IconPage size={15} strokeWidth={1.5} />
+          </span>
         )}
         <div className="flex-1 min-w-0">
           <div className="text-[13px] font-light truncate">{note.title || "Untitled"}</div>
-          <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+          <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
             {formatDate(note.updatedAt)}
           </div>
         </div>
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 flex-shrink-0">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 flex-shrink-0">
           <span
             onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
-            className="text-[11px] px-1 rounded cursor-default"
+            className="cursor-default flex items-center"
             style={{ color: note.favorite ? "#10b981" : "var(--text-muted)" }}
           >
-            {note.favorite ? "\u2605" : "\u2606"}
+            {note.favorite ? <IconStarFilled size={12} /> : <IconStar size={12} />}
           </span>
           <span
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="text-[11px] px-1 rounded cursor-default hover:text-red-400"
+            className="cursor-default flex items-center"
             style={{ color: "var(--text-muted)" }}
           >
-            \u00d7
+            <IconTrash size={12} />
           </span>
         </div>
       </button>
@@ -176,111 +175,204 @@ export default function Sidebar({
   onOpenSettings,
   activeWorkspace,
   onWorkspaceChange,
+  workspaces,
+  onCreateWorkspace,
+  onDeleteWorkspace,
 }: SidebarProps) {
   const [view, setView] = useState<SidebarView>("pages");
   const { theme, setTheme } = useTheme();
+  const [creatingWs, setCreatingWs] = useState(false);
+  const wsInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCreateWs = () => {
+    const name = wsInputRef.current?.value.trim();
+    if (name) {
+      onCreateWorkspace(name);
+      setCreatingWs(false);
+    }
+  };
 
   return (
     <aside
-      className="w-[260px] min-w-[260px] h-full flex flex-col border-r backdrop-blur-xl"
+      className="w-[260px] min-w-[260px] h-full flex flex-col border-r"
       style={{
         backgroundColor: "var(--sidebar-bg)",
         borderColor: "var(--border-color)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
       }}
     >
       {/* Drag region for macOS title bar */}
       <div className="h-[52px] flex-shrink-0 w-full" data-tauri-drag-region="true" />
 
-      {/* Brand + Theme Toggle */}
-      <div className="px-5 pb-3 flex items-center justify-between">
+      {/* Brand + Controls */}
+      <div className="px-5 pb-4 flex items-center justify-between">
         <h1 className="font-serif italic text-[22px] font-light tracking-tight" style={{ color: "var(--text-primary)" }}>
           Scaled.
         </h1>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors cursor-default text-sm"
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 cursor-default"
             style={{ color: "var(--text-muted)" }}
             title={theme === "dark" ? "Light Mode" : "Dark Mode"}
           >
-            {theme === "dark" ? "\u2600\ufe0f" : "\ud83c\udf19"}
+            {theme === "dark" ? <IconSun size={15} /> : <IconMoon size={15} />}
           </button>
           <button
             onClick={onOpenSettings}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors cursor-default text-sm"
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 cursor-default"
             style={{ color: "var(--text-muted)" }}
             title="Settings"
           >
-            {"\u2699\ufe0f"}
+            <IconSettings size={15} />
           </button>
         </div>
       </div>
 
       {/* Search */}
       <div className="px-3 mb-2">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search..."
-          className="w-full py-2 px-3 text-[13px] font-light rounded-lg outline-none transition-colors"
-          style={{
-            backgroundColor: "var(--bg-tertiary)",
-            border: "1px solid var(--border-color)",
-            color: "var(--text-primary)",
-          }}
-        />
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }}>
+            <IconSearch size={13} />
+          </span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search..."
+            className="w-full py-2 pl-8 pr-3 text-[13px] font-light rounded-lg outline-none transition-colors"
+            style={{
+              backgroundColor: "var(--bg-tertiary)",
+              border: "1px solid var(--border-color)",
+              color: "var(--text-primary)",
+            }}
+          />
+        </div>
       </div>
 
       {/* New Page */}
-      <div className="px-3 mb-2">
+      <div className="px-3 mb-3">
         <button
           onClick={onCreate}
-          className="w-full py-2 px-3 text-left text-[13px] font-light rounded-lg transition-all duration-200 cursor-default"
+          className="w-full py-2.5 px-3 text-left text-[13px] font-light rounded-lg transition-all duration-200 cursor-default flex items-center gap-2.5"
           style={{
             border: "1px solid var(--border-color)",
             color: "var(--text-secondary)",
           }}
         >
-          + New Page
+          <IconPlus size={14} />
+          <span>New Page</span>
         </button>
       </div>
 
       {/* Workspaces */}
-      <div className="px-3 mb-2">
-        <CollapsibleSection title="Workspaces">
-          <div className="space-y-0.5">
-            {DEFAULT_WORKSPACES.map((ws) => (
-              <button
-                key={ws.id}
-                onClick={() => onWorkspaceChange(ws.id)}
-                className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-light flex items-center gap-2 cursor-default transition-colors"
-                style={{
-                  backgroundColor: activeWorkspace === ws.id ? "var(--bg-hover)" : "transparent",
-                  color: activeWorkspace === ws.id ? "var(--text-primary)" : "var(--text-secondary)",
-                }}
-              >
-                <span className="text-sm">{ws.icon}</span>
-                <span>{ws.name}</span>
-              </button>
+      <div className="px-3 mb-1">
+        <CollapsibleSection
+          title="Workspaces"
+          action={
+            <button
+              onClick={() => setCreatingWs(true)}
+              className="flex items-center justify-center cursor-default"
+              style={{ color: "var(--text-muted)" }}
+            >
+              <IconFolderPlus size={13} />
+            </button>
+          }
+        >
+          <div className="space-y-px">
+            {/* All Pages */}
+            <button
+              onClick={() => onWorkspaceChange("")}
+              className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-light flex items-center gap-2.5 cursor-default transition-colors"
+              style={{
+                backgroundColor: activeWorkspace === "" ? "var(--bg-hover)" : "transparent",
+                color: activeWorkspace === "" ? "var(--text-primary)" : "var(--text-secondary)",
+              }}
+            >
+              <IconPages size={14} />
+              <span>All Pages</span>
+            </button>
+
+            {/* User workspaces */}
+            {workspaces.map((ws) => (
+              <div key={ws.id} className="group flex items-center">
+                <button
+                  onClick={() => onWorkspaceChange(ws.id)}
+                  className="flex-1 text-left px-3 py-1.5 rounded-lg text-[13px] font-light flex items-center gap-2.5 cursor-default transition-colors"
+                  style={{
+                    backgroundColor: activeWorkspace === ws.id ? "var(--bg-hover)" : "transparent",
+                    color: activeWorkspace === ws.id ? "var(--text-primary)" : "var(--text-secondary)",
+                  }}
+                >
+                  <IconFolder size={14} />
+                  <span>{ws.name}</span>
+                  <span
+                    className="w-2 h-2 rounded-full ml-auto flex-shrink-0"
+                    style={{ backgroundColor: ws.color }}
+                  />
+                </button>
+                <button
+                  onClick={() => onDeleteWorkspace(ws.id)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity mr-1 cursor-default flex items-center"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  <IconX size={11} />
+                </button>
+              </div>
             ))}
+
+            {/* Create workspace inline */}
+            <AnimatePresence>
+              {creatingWs && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex items-center gap-1.5 px-3 py-1.5">
+                    <span className="flex-shrink-0" style={{ color: "var(--text-muted)" }}><IconFolder size={14} /></span>
+                    <input
+                      ref={wsInputRef}
+                      autoFocus
+                      placeholder="Name..."
+                      className="flex-1 bg-transparent outline-none text-[13px] font-light"
+                      style={{ color: "var(--text-primary)" }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleCreateWs();
+                        if (e.key === "Escape") setCreatingWs(false);
+                      }}
+                      onBlur={() => {
+                        handleCreateWs();
+                        setCreatingWs(false);
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </CollapsibleSection>
       </div>
 
       {/* View Tabs */}
       <div className="px-3 mb-2 flex gap-1">
-        {(["pages", "trash"] as const).map((v) => (
+        {([
+          { key: "pages" as const, icon: <IconPage size={12} />, label: "Pages" },
+          { key: "trash" as const, icon: <IconTrash size={12} />, label: "Trash" },
+        ]).map((v) => (
           <button
-            key={v}
-            onClick={() => setView(v)}
-            className="flex-1 py-1.5 text-[11px] font-mono tracking-wider rounded-lg transition-colors cursor-default uppercase"
+            key={v.key}
+            onClick={() => setView(v.key)}
+            className="flex-1 py-1.5 text-[11px] tracking-wider rounded-lg transition-colors cursor-default flex items-center justify-center gap-1.5"
             style={{
-              backgroundColor: view === v ? "var(--bg-tertiary)" : "transparent",
-              color: view === v ? "var(--text-primary)" : "var(--text-muted)",
+              backgroundColor: view === v.key ? "var(--bg-tertiary)" : "transparent",
+              color: view === v.key ? "var(--text-primary)" : "var(--text-muted)",
             }}
           >
-            {v}
+            {v.icon}
+            <span className="uppercase">{v.label}</span>
           </button>
         ))}
       </div>
@@ -306,7 +398,7 @@ export default function Sidebar({
               </CollapsibleSection>
             )}
 
-            <CollapsibleSection title={searchQuery ? "Results" : "All Pages"} count={notes.length}>
+            <CollapsibleSection title={searchQuery ? "Results" : "Pages"} count={notes.length}>
               <AnimatePresence mode="popLayout">
                 {notes.map((note) => (
                   <NoteItem
@@ -322,6 +414,11 @@ export default function Sidebar({
               {notes.length === 0 && searchQuery && (
                 <p className="text-center text-[13px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
                   No results
+                </p>
+              )}
+              {notes.length === 0 && !searchQuery && (
+                <p className="text-center text-[13px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
+                  No pages yet
                 </p>
               )}
             </CollapsibleSection>
@@ -340,51 +437,60 @@ export default function Sidebar({
                 >
                   <button
                     onClick={() => onSelect(note.id)}
-                    className="flex-1 text-left px-3 py-2 rounded-lg transition-colors cursor-default"
+                    className="flex-1 text-left px-3 py-2 rounded-lg transition-colors cursor-default flex items-center gap-2.5"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    <div className="text-[13px] font-light truncate">
-                      {note.icon} {note.title || "Untitled"}
-                    </div>
-                    <div className="text-[10px] font-mono mt-0.5" style={{ color: "var(--text-muted)" }}>
-                      {formatDate(note.updatedAt)}
+                    <span style={{ color: "var(--text-muted)" }}><IconPage size={14} /></span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-light truncate">
+                        {note.title || "Untitled"}
+                      </div>
+                      <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                        {formatDate(note.updatedAt)}
+                      </div>
                     </div>
                   </button>
-                  <div className="flex gap-0.5 flex-shrink-0 pr-1">
+                  <div className="flex gap-1 flex-shrink-0 pr-2">
                     <button
                       onClick={() => onRestore(note.id)}
-                      className="text-[11px] px-1.5 py-1 rounded cursor-default"
+                      className="cursor-default flex items-center"
                       style={{ color: "var(--text-muted)" }}
                       title="Restore"
                     >
-                      {"\u21a9"}
+                      <IconRestore size={13} />
                     </button>
                     <button
                       onClick={() => { if (confirm("Permanently delete?")) onPermanentDelete(note.id); }}
-                      className="text-[11px] px-1.5 py-1 rounded cursor-default"
+                      className="cursor-default flex items-center"
                       style={{ color: "var(--text-muted)" }}
                       title="Delete forever"
                     >
-                      {"\u2715"}
+                      <IconX size={13} />
                     </button>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
             {trashedNotes.length === 0 && (
-              <p className="text-center text-[13px] py-8 font-light italic" style={{ color: "var(--text-muted)" }}>
-                Trash is empty
-              </p>
+              <div className="flex flex-col items-center py-10 gap-2">
+                <IconTrash size={20} className="" />
+                <p className="text-[13px] font-light italic" style={{ color: "var(--text-muted)" }}>
+                  Trash is empty
+                </p>
+              </div>
             )}
           </div>
         )}
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t" style={{ borderColor: "var(--border-color)" }}>
-        <p className="text-[10px] font-mono tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
-          {notes.length} {notes.length === 1 ? "page" : "pages"}
-        </p>
+      <div className="p-3 border-t flex items-center justify-between" style={{ borderColor: "var(--border-color)" }}>
+        <div className="flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+          <IconPen size={11} />
+          <span className="text-[10px] tracking-[0.1em] uppercase font-medium">
+            {notes.length} {notes.length === 1 ? "page" : "pages"}
+          </span>
+        </div>
       </div>
     </aside>
   );

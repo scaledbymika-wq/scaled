@@ -1,10 +1,14 @@
 import { motion } from "framer-motion";
+import {
+  IconPage, IconMeeting, IconRocket, IconChart, IconJournal,
+  IconTarget, IconHandshake, IconLightning, IconX,
+} from "./Icons";
 
 export interface Template {
   id: string;
   name: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
   content: string;
   defaultTitle: string;
 }
@@ -14,7 +18,7 @@ const templates: Template[] = [
     id: "blank",
     name: "Blank Page",
     description: "Start from scratch",
-    icon: "\ud83d\udcc4",
+    icon: <IconPage size={20} strokeWidth={1.3} />,
     defaultTitle: "",
     content: "",
   },
@@ -22,7 +26,7 @@ const templates: Template[] = [
     id: "meeting",
     name: "Meeting Notes",
     description: "Agenda, notes, and action items",
-    icon: "\ud83d\udcac",
+    icon: <IconMeeting size={20} strokeWidth={1.3} />,
     defaultTitle: "Meeting Notes",
     content: `<h2>Agenda</h2><ul><li><p>Topic 1</p></li><li><p>Topic 2</p></li><li><p>Topic 3</p></li></ul><h2>Notes</h2><p></p><h2>Action Items</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Action item 1</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Action item 2</p></div></li></ul>`,
   },
@@ -30,7 +34,7 @@ const templates: Template[] = [
     id: "project",
     name: "Project Brief",
     description: "Goals, timeline, and resources",
-    icon: "\ud83d\ude80",
+    icon: <IconRocket size={20} strokeWidth={1.3} />,
     defaultTitle: "Project Brief",
     content: `<h2>Overview</h2><p>Describe the project in 2-3 sentences.</p><h2>Goals</h2><ul><li><p>Goal 1</p></li><li><p>Goal 2</p></li><li><p>Goal 3</p></li></ul><h2>Timeline</h2><table><tr><th>Phase</th><th>Deadline</th><th>Status</th></tr><tr><td>Research</td><td></td><td></td></tr><tr><td>Execution</td><td></td><td></td></tr><tr><td>Review</td><td></td><td></td></tr></table><h2>Resources</h2><p></p>`,
   },
@@ -38,7 +42,7 @@ const templates: Template[] = [
     id: "weekly",
     name: "Weekly Review",
     description: "Reflect and plan ahead",
-    icon: "\ud83d\udcc8",
+    icon: <IconChart size={20} strokeWidth={1.3} />,
     defaultTitle: "Weekly Review",
     content: `<h2>Wins This Week</h2><ul><li><p></p></li></ul><h2>Challenges</h2><ul><li><p></p></li></ul><h2>Learnings</h2><blockquote><p>What did I learn this week?</p></blockquote><h2>Next Week Priorities</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Priority 1</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Priority 2</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Priority 3</p></div></li></ul>`,
   },
@@ -46,7 +50,7 @@ const templates: Template[] = [
     id: "journal",
     name: "Daily Journal",
     description: "Daily thoughts and reflections",
-    icon: "\ud83d\udcdd",
+    icon: <IconJournal size={20} strokeWidth={1.3} />,
     defaultTitle: new Date().toLocaleDateString("de-DE", {
       weekday: "long",
       day: "numeric",
@@ -59,7 +63,7 @@ const templates: Template[] = [
     id: "strategy",
     name: "Strategy Document",
     description: "Analysis, plan, and execution",
-    icon: "\ud83c\udfaf",
+    icon: <IconTarget size={20} strokeWidth={1.3} />,
     defaultTitle: "Strategy",
     content: `<h2>Situation Analysis</h2><p>Where are we now?</p><h2>Objective</h2><p>Where do we want to be?</p><h2>Strategy</h2><p>How do we get there?</p><h2>Tactics</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Tactic 1</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Tactic 2</p></div></li></ul><h2>KPIs</h2><table><tr><th>Metric</th><th>Current</th><th>Target</th></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></table>`,
   },
@@ -67,7 +71,7 @@ const templates: Template[] = [
     id: "client",
     name: "Client Onboarding",
     description: "New client setup checklist",
-    icon: "\ud83e\udd1d",
+    icon: <IconHandshake size={20} strokeWidth={1.3} />,
     defaultTitle: "Client Onboarding",
     content: `<h2>Client Details</h2><table><tr><th>Field</th><th>Value</th></tr><tr><td>Name</td><td></td></tr><tr><td>Industry</td><td></td></tr><tr><td>Contact</td><td></td></tr><tr><td>Start Date</td><td></td></tr></table><h2>Onboarding Checklist</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Welcome email sent</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Access credentials shared</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Kickoff meeting scheduled</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Brand assets received</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Strategy document created</p></div></li></ul><h2>Notes</h2><p></p>`,
   },
@@ -75,7 +79,7 @@ const templates: Template[] = [
     id: "brainstorm",
     name: "Brainstorm",
     description: "Capture ideas freely",
-    icon: "\u26a1",
+    icon: <IconLightning size={20} strokeWidth={1.3} />,
     defaultTitle: "Brainstorm",
     content: `<h2>Topic</h2><p></p><hr><h2>Ideas</h2><ul><li><p></p></li></ul><h2>Best Ideas to Explore</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p></p></div></li></ul>`,
   },
@@ -92,25 +96,38 @@ export default function TemplatePicker({ onSelect, onClose }: TemplatePickerProp
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)" }}
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.96, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={{ duration: 0.2 }}
-        className="w-[560px] max-h-[500px] rounded-xl shadow-2xl overflow-hidden flex flex-col"
-        style={{ backgroundColor: "var(--card-bg)", border: "1px solid var(--border-color)" }}
+        exit={{ opacity: 0, scale: 0.96, y: 16 }}
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className="w-[560px] max-h-[520px] rounded-2xl overflow-hidden flex flex-col"
+        style={{
+          backgroundColor: "var(--card-bg)",
+          border: "1px solid var(--border-color)",
+          boxShadow: "0 24px 48px -12px rgba(0,0,0,0.4)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b" style={{ borderColor: "var(--border-color)" }}>
-          <h2 className="font-serif italic text-xl font-light" style={{ color: "var(--text-primary)" }}>
-            New Page
-          </h2>
-          <p className="text-[13px] mt-1" style={{ color: "var(--text-muted)" }}>Choose a template or start blank</p>
+        <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: "var(--border-color)" }}>
+          <div>
+            <h2 className="font-serif italic text-xl font-light" style={{ color: "var(--text-primary)" }}>
+              New Page
+            </h2>
+            <p className="text-[13px] mt-0.5" style={{ color: "var(--text-muted)" }}>Choose a template or start blank</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg flex items-center justify-center cursor-default"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <IconX size={16} />
+          </button>
         </div>
 
         {/* Templates Grid */}
@@ -123,7 +140,17 @@ export default function TemplatePicker({ onSelect, onClose }: TemplatePickerProp
                 className="text-left p-4 rounded-xl transition-all duration-200 cursor-default group"
                 style={{ border: "1px solid var(--border-color)" }}
               >
-                <span className="text-2xl mb-2 block">{tmpl.icon}</span>
+                <span
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                  style={{
+                    backgroundColor: "var(--bg-tertiary)",
+                    border: "1px solid var(--border-color)",
+                    color: "var(--text-secondary)",
+                    display: "flex",
+                  }}
+                >
+                  {tmpl.icon}
+                </span>
                 <div className="text-[14px] font-light" style={{ color: "var(--text-primary)" }}>
                   {tmpl.name}
                 </div>

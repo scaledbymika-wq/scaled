@@ -7,11 +7,19 @@ export interface Note {
   parentId: string | null;
   favorite: boolean;
   trashed: boolean;
+  workspace: string;
   createdAt: number;
   updatedAt: number;
 }
 
+export interface Workspace {
+  id: string;
+  name: string;
+  color: string;
+}
+
 const STORAGE_KEY = "scaled-notes";
+const WORKSPACE_KEY = "scaled-workspaces";
 
 function readAll(): Note[] {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -27,7 +35,6 @@ function writeAll(notes: Note[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
 }
 
-// Migrate old notes that may lack new fields
 function migrate(note: Partial<Note> & { id: string }): Note {
   return {
     id: note.id,
@@ -38,6 +45,7 @@ function migrate(note: Partial<Note> & { id: string }): Note {
     parentId: note.parentId ?? null,
     favorite: note.favorite ?? false,
     trashed: note.trashed ?? false,
+    workspace: note.workspace ?? "",
     createdAt: note.createdAt ?? Date.now(),
     updatedAt: note.updatedAt ?? Date.now(),
   };
@@ -48,6 +56,11 @@ export function getNotes(): Note[] {
     .map(migrate)
     .filter((n) => !n.trashed)
     .sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+export function getNotesForWorkspace(workspaceId: string): Note[] {
+  if (!workspaceId) return getNotes();
+  return getNotes().filter((n) => n.workspace === workspaceId);
 }
 
 export function getFavorites(): Note[] {
@@ -83,7 +96,7 @@ export function searchNotes(query: string): Note[] {
   );
 }
 
-export function createNote(parentId: string | null = null): Note {
+export function createNote(parentId: string | null = null, workspace = ""): Note {
   const note: Note = {
     id: crypto.randomUUID(),
     title: "",
@@ -93,6 +106,7 @@ export function createNote(parentId: string | null = null): Note {
     parentId,
     favorite: false,
     trashed: false,
+    workspace,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -125,6 +139,63 @@ export function permanentlyDelete(id: string) {
 export function toggleFavorite(id: string) {
   const note = getNote(id);
   if (note) updateNote(id, { favorite: !note.favorite });
+}
+
+// — Workspace CRUD —
+
+const WORKSPACE_COLORS = [
+  "#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444",
+  "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
+];
+
+export function getWorkspaces(): Workspace[] {
+  const raw = localStorage.getItem(WORKSPACE_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as Workspace[];
+  } catch {
+    return [];
+  }
+}
+
+function writeWorkspaces(ws: Workspace[]) {
+  localStorage.setItem(WORKSPACE_KEY, JSON.stringify(ws));
+}
+
+export function createWorkspace(name: string): Workspace {
+  const existing = getWorkspaces();
+  const colorIndex = existing.length % WORKSPACE_COLORS.length;
+  const ws: Workspace = {
+    id: crypto.randomUUID(),
+    name,
+    color: WORKSPACE_COLORS[colorIndex],
+  };
+  existing.push(ws);
+  writeWorkspaces(existing);
+  return ws;
+}
+
+export function updateWorkspace(id: string, updates: Partial<Omit<Workspace, "id">>) {
+  const workspaces = getWorkspaces();
+  const idx = workspaces.findIndex((w) => w.id === id);
+  if (idx === -1) return;
+  Object.assign(workspaces[idx], updates);
+  writeWorkspaces(workspaces);
+}
+
+export function deleteWorkspace(id: string) {
+  writeWorkspaces(getWorkspaces().filter((w) => w.id !== id));
+  // Unassign notes from deleted workspace
+  const notes = readAll().map(migrate);
+  notes.forEach((n) => {
+    if (n.workspace === id) n.workspace = "";
+  });
+  writeAll(notes);
+}
+
+export function getNextWorkspaceColor(): string {
+  const existing = getWorkspaces();
+  return WORKSPACE_COLORS[existing.length % WORKSPACE_COLORS.length];
 }
 
 // Convert image file to base64 data URL for local storage

@@ -1,5 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import type { Editor } from "@tiptap/react";
+import {
+  IconBold, IconItalic, IconUnderline, IconStrikethrough,
+  IconCode, IconHighlight, IconLink,
+} from "./Icons";
 
 interface FloatingToolbarProps {
   editor: Editor;
@@ -47,36 +51,12 @@ export default function FloatingToolbar({ editor }: FloatingToolbarProps) {
   if (!visible || !position) return null;
 
   const buttons = [
-    {
-      label: "B",
-      action: () => editor.chain().focus().toggleBold().run(),
-      isActive: editor.isActive("bold"),
-    },
-    {
-      label: "I",
-      action: () => editor.chain().focus().toggleItalic().run(),
-      isActive: editor.isActive("italic"),
-    },
-    {
-      label: "U",
-      action: () => editor.chain().focus().toggleUnderline().run(),
-      isActive: editor.isActive("underline"),
-    },
-    {
-      label: "S",
-      action: () => editor.chain().focus().toggleStrike().run(),
-      isActive: editor.isActive("strike"),
-    },
-    {
-      label: "<>",
-      action: () => editor.chain().focus().toggleCode().run(),
-      isActive: editor.isActive("code"),
-    },
-    {
-      label: "H",
-      action: () => editor.chain().focus().toggleHighlight().run(),
-      isActive: editor.isActive("highlight"),
-    },
+    { icon: <IconBold size={14} />, action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive("bold") },
+    { icon: <IconItalic size={14} />, action: () => editor.chain().focus().toggleItalic().run(), isActive: editor.isActive("italic") },
+    { icon: <IconUnderline size={14} />, action: () => editor.chain().focus().toggleUnderline().run(), isActive: editor.isActive("underline") },
+    { icon: <IconStrikethrough size={14} />, action: () => editor.chain().focus().toggleStrike().run(), isActive: editor.isActive("strike") },
+    { icon: <IconCode size={14} />, action: () => editor.chain().focus().toggleCode().run(), isActive: editor.isActive("code") },
+    { icon: <IconHighlight size={14} />, action: () => editor.chain().focus().toggleHighlight().run(), isActive: editor.isActive("highlight") },
   ];
 
   return (
@@ -89,27 +69,28 @@ export default function FloatingToolbar({ editor }: FloatingToolbarProps) {
       }}
     >
       <div
-        className="rounded-lg shadow-2xl flex items-center overflow-hidden"
+        className="rounded-xl flex items-center overflow-hidden"
         style={{
           backgroundColor: "var(--card-bg)",
           border: "1px solid var(--border-color)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
         }}
       >
         {buttons.map((btn, i) => (
           <button
-            key={btn.label}
+            key={i}
             onMouseDown={(e) => {
               e.preventDefault();
               btn.action();
             }}
-            className="px-3 py-2 text-[13px] font-mono transition-colors duration-100 cursor-default"
+            className="w-9 h-9 flex items-center justify-center transition-colors duration-100 cursor-default"
             style={{
               color: btn.isActive ? "#10b981" : "var(--text-secondary)",
               backgroundColor: btn.isActive ? "var(--bg-tertiary)" : "transparent",
               borderLeft: i > 0 ? "1px solid var(--border-color)" : "none",
             }}
           >
-            {btn.label}
+            {btn.icon}
           </button>
         ))}
 
@@ -124,14 +105,14 @@ export default function FloatingToolbar({ editor }: FloatingToolbarProps) {
               if (url) editor.chain().focus().setLink({ href: url }).run();
             }
           }}
-          className="px-3 py-2 text-[13px] transition-colors duration-100 cursor-default"
+          className="w-9 h-9 flex items-center justify-center transition-colors duration-100 cursor-default"
           style={{
             color: editor.isActive("link") ? "#10b981" : "var(--text-secondary)",
             backgroundColor: editor.isActive("link") ? "var(--bg-tertiary)" : "transparent",
             borderLeft: "1px solid var(--border-color)",
           }}
         >
-          Link
+          <IconLink size={14} />
         </button>
       </div>
     </div>

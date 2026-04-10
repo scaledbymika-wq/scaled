@@ -8,12 +8,19 @@ import {
   useImperativeHandle,
   useState,
   useCallback,
+  type ReactNode,
 } from "react";
+import {
+  IconText, IconHeading1, IconHeading2, IconHeading3,
+  IconTaskList, IconBulletList, IconNumberedList,
+  IconQuote, IconDivider, IconCodeBlock, IconImage,
+  IconTable, IconCallout,
+} from "../components/Icons";
 
 export interface CommandItem {
   title: string;
   description: string;
-  icon: string;
+  icon: ReactNode;
   command: (props: { editor: any; range: any }) => void;
 }
 
@@ -21,7 +28,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Text",
     description: "Plain text block",
-    icon: "Aa",
+    icon: <IconText size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setParagraph().run();
     },
@@ -29,7 +36,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Heading 1",
     description: "Large section heading",
-    icon: "H1",
+    icon: <IconHeading1 size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setHeading({ level: 1 }).run();
     },
@@ -37,7 +44,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Heading 2",
     description: "Medium section heading",
-    icon: "H2",
+    icon: <IconHeading2 size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setHeading({ level: 2 }).run();
     },
@@ -45,7 +52,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Heading 3",
     description: "Small section heading",
-    icon: "H3",
+    icon: <IconHeading3 size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setHeading({ level: 3 }).run();
     },
@@ -53,7 +60,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "To-do List",
     description: "Track tasks with checkboxes",
-    icon: "\u2611",
+    icon: <IconTaskList size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleTaskList().run();
     },
@@ -61,7 +68,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Bullet List",
     description: "Unordered list",
-    icon: "\u2022",
+    icon: <IconBulletList size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleBulletList().run();
     },
@@ -69,7 +76,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Numbered List",
     description: "Ordered list",
-    icon: "1.",
+    icon: <IconNumberedList size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleOrderedList().run();
     },
@@ -77,7 +84,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Quote",
     description: "Capture a quote",
-    icon: "\u201C",
+    icon: <IconQuote size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setBlockquote().run();
     },
@@ -85,7 +92,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Divider",
     description: "Horizontal line separator",
-    icon: "\u2014",
+    icon: <IconDivider size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setHorizontalRule().run();
     },
@@ -93,7 +100,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Code Block",
     description: "Code with syntax highlighting",
-    icon: "</>",
+    icon: <IconCodeBlock size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setCodeBlock().run();
     },
@@ -101,7 +108,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Image",
     description: "Upload or embed an image",
-    icon: "\ud83d\uddbc",
+    icon: <IconImage size={15} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).run();
       const input = document.createElement("input");
@@ -122,7 +129,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Table",
     description: "Insert a table",
-    icon: "\u25a6",
+    icon: <IconTable size={15} />,
     command: ({ editor, range }) => {
       editor
         .chain()
@@ -135,7 +142,7 @@ const getSuggestionItems = (): CommandItem[] => [
   {
     title: "Callout",
     description: "Highlighted info block",
-    icon: "\ud83d\udca1",
+    icon: <IconCallout size={15} />,
     command: ({ editor, range }) => {
       editor
         .chain()
@@ -194,10 +201,11 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
 
     return (
       <div
-        className="rounded-xl shadow-2xl overflow-hidden w-[280px] max-h-[320px] overflow-y-auto py-1"
+        className="rounded-xl overflow-hidden w-[280px] max-h-[320px] overflow-y-auto py-1"
         style={{
           backgroundColor: "var(--card-bg)",
           border: "1px solid var(--border-color)",
+          boxShadow: "0 16px 40px -8px rgba(0,0,0,0.3)",
         }}
       >
         {items.map((item, index) => (
@@ -211,10 +219,11 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
             }}
           >
             <span
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{
                 backgroundColor: "var(--bg-tertiary)",
                 border: "1px solid var(--border-color)",
+                color: "var(--text-secondary)",
               }}
             >
               {item.icon}
