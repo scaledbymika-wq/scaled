@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import type { Editor } from "@tiptap/react";
 import {
   IconBold, IconItalic, IconUnderline, IconStrikethrough,
-  IconCode, IconHighlight, IconLink,
+  IconCode, IconHighlight, IconLink, IconAlignLeft, IconAlignCenter, IconAlignRight,
 } from "./Icons";
 
 interface FloatingToolbarProps {
@@ -50,13 +50,19 @@ export default function FloatingToolbar({ editor }: FloatingToolbarProps) {
 
   if (!visible || !position) return null;
 
-  const buttons = [
+  const formatButtons = [
     { icon: <IconBold size={14} />, action: () => editor.chain().focus().toggleBold().run(), isActive: editor.isActive("bold") },
     { icon: <IconItalic size={14} />, action: () => editor.chain().focus().toggleItalic().run(), isActive: editor.isActive("italic") },
     { icon: <IconUnderline size={14} />, action: () => editor.chain().focus().toggleUnderline().run(), isActive: editor.isActive("underline") },
     { icon: <IconStrikethrough size={14} />, action: () => editor.chain().focus().toggleStrike().run(), isActive: editor.isActive("strike") },
     { icon: <IconCode size={14} />, action: () => editor.chain().focus().toggleCode().run(), isActive: editor.isActive("code") },
     { icon: <IconHighlight size={14} />, action: () => editor.chain().focus().toggleHighlight().run(), isActive: editor.isActive("highlight") },
+  ];
+
+  const alignButtons = [
+    { icon: <IconAlignLeft size={14} />, action: () => editor.chain().focus().setTextAlign("left").run(), isActive: editor.isActive({ textAlign: "left" }) },
+    { icon: <IconAlignCenter size={14} />, action: () => editor.chain().focus().setTextAlign("center").run(), isActive: editor.isActive({ textAlign: "center" }) },
+    { icon: <IconAlignRight size={14} />, action: () => editor.chain().focus().setTextAlign("right").run(), isActive: editor.isActive({ textAlign: "right" }) },
   ];
 
   return (
@@ -76,7 +82,7 @@ export default function FloatingToolbar({ editor }: FloatingToolbarProps) {
           boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
         }}
       >
-        {buttons.map((btn, i) => (
+        {formatButtons.map((btn, i) => (
           <button
             key={i}
             onMouseDown={(e) => {
@@ -114,6 +120,27 @@ export default function FloatingToolbar({ editor }: FloatingToolbarProps) {
         >
           <IconLink size={14} />
         </button>
+
+        {/* Separator */}
+        <div className="w-px h-5 mx-0.5" style={{ backgroundColor: "var(--border-color)" }} />
+
+        {/* Alignment */}
+        {alignButtons.map((btn, i) => (
+          <button
+            key={`align-${i}`}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              btn.action();
+            }}
+            className="w-9 h-9 flex items-center justify-center transition-colors duration-100 cursor-default"
+            style={{
+              color: btn.isActive ? "#10b981" : "var(--text-secondary)",
+              backgroundColor: btn.isActive ? "var(--bg-tertiary)" : "transparent",
+            }}
+          >
+            {btn.icon}
+          </button>
+        ))}
       </div>
     </div>
   );

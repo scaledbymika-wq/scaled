@@ -213,3 +213,43 @@ export function IconPen(p: IconProps) {
 export function IconPalette(p: IconProps) {
   return <I {...p}><circle cx="13.5" cy="6.5" r="0.5" fill="currentColor" /><circle cx="17.5" cy="10.5" r="0.5" fill="currentColor" /><circle cx="8.5" cy="7.5" r="0.5" fill="currentColor" /><circle cx="6.5" cy="12" r="0.5" fill="currentColor" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></I>;
 }
+
+// — Alignment —
+
+export function IconAlignLeft(p: IconProps) {
+  return <I {...p}><line x1="17" y1="10" x2="3" y2="10" /><line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="14" x2="3" y2="14" /><line x1="17" y1="18" x2="3" y2="18" /></I>;
+}
+
+export function IconAlignCenter(p: IconProps) {
+  return <I {...p}><line x1="18" y1="10" x2="6" y2="10" /><line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="14" x2="3" y2="14" /><line x1="18" y1="18" x2="6" y2="18" /></I>;
+}
+
+export function IconAlignRight(p: IconProps) {
+  return <I {...p}><line x1="21" y1="10" x2="7" y2="10" /><line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="14" x2="3" y2="14" /><line x1="21" y1="18" x2="7" y2="18" /></I>;
+}
+
+// — UI —
+
+export function IconMenu(p: IconProps) {
+  return <I {...p}><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="18" x2="20" y2="18" /></I>;
+}
+
+export function IconCheck(p: IconProps) {
+  return <I {...p}><polyline points="20 6 9 17 4 12" /></I>;
+}
+
+export function IconExpand(p: IconProps) {
+  return <I {...p}><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" /></I>;
+}
+
+export function IconShrink(p: IconProps) {
+  return <I {...p}><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" /></I>;
+}
+
+export function IconHabit(p: IconProps) {
+  return <I {...p}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></I>;
+}
+
+export function IconSidebar(p: IconProps) {
+  return <I {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="3" x2="9" y2="21" /></I>;
+}

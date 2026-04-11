@@ -36,6 +36,7 @@ interface EditorProps {
   cover: string;
   onIconChange: (icon: string) => void;
   onCoverChange: (cover: string) => void;
+  zenMode?: boolean;
 }
 
 export default function Editor({
@@ -47,6 +48,7 @@ export default function Editor({
   cover,
   onIconChange,
   onCoverChange,
+  zenMode = false,
 }: EditorProps) {
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const { settings } = useTheme();
@@ -89,18 +91,25 @@ export default function Editor({
     },
     editorProps: {
       attributes: { class: "tiptap" },
-      handleDrop: (view, event) => {
+      // Strip inline color/background styles from pasted HTML so theme colors apply
+      transformPastedHTML(html: string) {
+        return html
+          .replace(/\s*color\s*:\s*[^;"']+;?/gi, "")
+          .replace(/\s*background-color\s*:\s*[^;"']+;?/gi, "")
+          .replace(/\s*background\s*:\s*(?!none)[^;"']+;?/gi, "");
+      },
+      handleDrop: (view, event, _slice, moved) => {
+        if (moved) return false;
         const files = event.dataTransfer?.files;
         if (files && files.length > 0) {
           event.preventDefault();
+          const dropPos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+          if (!dropPos) return false;
           Array.from(files).forEach(async (file) => {
             if (file.type.startsWith("image/")) {
               const src = await fileToDataUrl(file);
-              view.dispatch(
-                view.state.tr.replaceSelectionWith(
-                  view.state.schema.nodes.image.create({ src })
-                )
-              );
+              const node = view.state.schema.nodes.image.create({ src });
+              view.dispatch(view.state.tr.insert(dropPos.pos, node));
             }
           });
           return true;
@@ -127,6 +136,18 @@ export default function Editor({
             }
           }
         }
+        // Auto-embed image URLs (e.g. Pinterest pins, direct image links)
+        const text = event.clipboardData?.getData("text/plain")?.trim();
+        if (text) {
+          const imageUrlRe = /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|svg|avif)(\?.*)?$/i;
+          const pinterestRe = /^https?:\/\/i\.pinimg\.com\//i;
+          if (imageUrlRe.test(text) || pinterestRe.test(text)) {
+            event.preventDefault();
+            const node = view.state.schema.nodes.image.create({ src: text });
+            view.dispatch(view.state.tr.replaceSelectionWith(node));
+            return true;
+          }
+        }
         return false;
       },
     },
@@ -144,6 +165,32 @@ export default function Editor({
       titleRef.current.style.height = titleRef.current.scrollHeight + "px";
     }
   }, [title]);
+
+  // Typewriter scrolling: keep cursor line centered on every update and keystroke
+  useEffect(() => {
+    if (!editor || !settings.typewriterScrolling) return;
+    const scrollToCursor = () => {
+      requestAnimationFrame(() => {
+        try {
+          const { from } = editor.state.selection;
+          const coords = editor.view.coordsAtPos(from);
+          const container = editor.view.dom.closest(".overflow-y-auto");
+          if (!container) return;
+          const rect = container.getBoundingClientRect();
+          const offset = coords.top - rect.top - rect.height / 2;
+          if (Math.abs(offset) > 10) {
+            container.scrollBy({ top: offset, behavior: "smooth" });
+          }
+        } catch {}
+      });
+    };
+    editor.on("selectionUpdate", scrollToCursor);
+    editor.on("update", scrollToCursor);
+    return () => {
+      editor.off("selectionUpdate", scrollToCursor);
+      editor.off("update", scrollToCursor);
+    };
+  }, [editor, settings.typewriterScrolling]);
 
   const handleCoverUpload = useCallback(async () => {
     coverInputRef.current?.click();
@@ -213,7 +260,7 @@ export default function Editor({
         </div>
       ) : null}
 
-      <div className={`mx-auto px-8 ${cover ? "pt-8" : "pt-28"} pb-40`} style={{ maxWidth: editorMaxWidth, fontSize: editorFontSize }}>
+      <div className={`mx-auto px-8 ${cover ? "pt-8" : zenMode ? "pt-20" : "pt-28"} pb-40`} style={{ maxWidth: zenMode ? "760px" : editorMaxWidth, fontSize: editorFontSize }}>
         {/* Page Controls */}
         <div className="flex items-center gap-2 mb-4 opacity-0 hover:opacity-100 transition-opacity duration-300">
           <button
@@ -268,8 +315,8 @@ export default function Editor({
         </div>
       </div>
 
-      {/* Block Insert Menu (floating + button) */}
-      {editor && <BlockMenu editor={editor} />}
+      {/* Block Insert Menu (floating + button) — hidden in zen mode */}
+      {editor && !zenMode && <BlockMenu editor={editor} />}
     </div>
   );
 }

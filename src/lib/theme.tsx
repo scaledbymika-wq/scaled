@@ -8,6 +8,7 @@ interface Settings {
   editorWidth: "narrow" | "normal" | "wide";
   fontSize: "small" | "medium" | "large";
   showWordCount: boolean;
+  typewriterScrolling: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -16,6 +17,7 @@ const DEFAULT_SETTINGS: Settings = {
   editorWidth: "normal",
   fontSize: "medium",
   showWordCount: true,
+  typewriterScrolling: false,
 };
 
 interface ThemeContextType {

@@ -1,14 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef } from "react";
 import type { Note, Workspace } from "../lib/storage";
-import { useTheme } from "../lib/theme";
 import {
-  IconSearch, IconPlus, IconChevron, IconSettings, IconSun, IconMoon,
+  IconSearch, IconPlus, IconChevron, IconSettings,
   IconStar, IconStarFilled, IconTrash, IconPage, IconPages,
-  IconFolder, IconFolderPlus, IconX, IconRestore, IconPen,
+  IconFolder, IconFolderPlus, IconX, IconRestore, IconPen, IconSidebar, IconHabit,
 } from "./Icons";
 
-type SidebarView = "pages" | "trash";
+type SidebarView = "pages" | "trash" | "habits";
 
 interface SidebarProps {
   notes: Note[];
@@ -30,11 +29,14 @@ interface SidebarProps {
   onCreateWorkspace: (name: string) => void;
   onDeleteWorkspace: (id: string) => void;
   onAssignWorkspace: (noteId: string, workspaceId: string) => void;
+  onCollapse: () => void;
+  activeView: string;
+  onViewChange: (view: string) => void;
 }
 
 function formatDate(ts: number) {
   const d = new Date(ts);
-  return d.toLocaleDateString("de-DE", { day: "2-digit", month: "short" });
+  return d.toLocaleDateString("en-US", { day: "2-digit", month: "short" });
 }
 
 function CollapsibleSection({
@@ -56,14 +58,14 @@ function CollapsibleSection({
     <div className="mb-1">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-1.5 px-3 py-1.5 cursor-default group"
+        className="w-full flex items-center gap-1.5 px-3 py-1 cursor-default group"
       >
         <motion.div
           animate={{ rotate: open ? 90 : 0 }}
           transition={{ duration: 0.15 }}
           style={{ color: "var(--text-muted)" }}
         >
-          <IconChevron size={10} />
+          <IconChevron size={9} />
         </motion.div>
         <span className="text-[10px] font-sans tracking-[0.12em] uppercase font-medium" style={{ color: "var(--text-muted)" }}>
           {title}
@@ -119,22 +121,22 @@ function NoteItem({
     >
       <button
         onClick={onSelect}
-        className="w-full text-left px-3 py-2 rounded-lg mb-px cursor-default transition-all duration-150 group flex items-center gap-2.5"
+        className="w-full text-left px-3 py-1.5 rounded-lg mb-px cursor-default transition-all duration-150 group flex items-center gap-2"
         style={{
           backgroundColor: isActive ? "var(--bg-hover)" : "transparent",
           color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
         }}
       >
         {note.icon ? (
-          <span className="text-sm flex-shrink-0">{note.icon}</span>
+          <span className="text-[13px] flex-shrink-0">{note.icon}</span>
         ) : (
           <span style={{ color: "var(--text-muted)" }} className="flex-shrink-0">
-            <IconPage size={15} strokeWidth={1.5} />
+            <IconPage size={14} strokeWidth={1.5} />
           </span>
         )}
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-light truncate">{note.title || "Untitled"}</div>
-          <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+          <div className="text-[12px] font-light truncate">{note.title || "Untitled"}</div>
+          <div className="text-[9px] mt-0.5" style={{ color: "var(--text-muted)" }}>
             {formatDate(note.updatedAt)}
           </div>
         </div>
@@ -144,14 +146,14 @@ function NoteItem({
             className="cursor-default flex items-center"
             style={{ color: note.favorite ? "#10b981" : "var(--text-muted)" }}
           >
-            {note.favorite ? <IconStarFilled size={12} /> : <IconStar size={12} />}
+            {note.favorite ? <IconStarFilled size={11} /> : <IconStar size={11} />}
           </span>
           <span
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
             className="cursor-default flex items-center"
             style={{ color: "var(--text-muted)" }}
           >
-            <IconTrash size={12} />
+            <IconTrash size={11} />
           </span>
         </div>
       </button>
@@ -178,11 +180,15 @@ export default function Sidebar({
   workspaces,
   onCreateWorkspace,
   onDeleteWorkspace,
+  onCollapse,
+  activeView,
+  onViewChange,
 }: SidebarProps) {
-  const [view, setView] = useState<SidebarView>("pages");
-  const { theme, setTheme } = useTheme();
   const [creatingWs, setCreatingWs] = useState(false);
   const wsInputRef = useRef<HTMLInputElement>(null);
+
+  const view = (activeView === "habits" ? "habits" : activeView === "trash" ? "trash" : "pages") as SidebarView;
+  const setView = (v: SidebarView) => onViewChange(v);
 
   const handleCreateWs = () => {
     const name = wsInputRef.current?.value.trim();
@@ -206,26 +212,26 @@ export default function Sidebar({
       <div className="h-[52px] flex-shrink-0 w-full" data-tauri-drag-region="true" />
 
       {/* Brand + Controls */}
-      <div className="px-5 pb-4 flex items-center justify-between">
-        <h1 className="font-serif italic text-[22px] font-light tracking-tight" style={{ color: "var(--text-primary)" }}>
+      <div className="px-4 pb-3 flex items-center justify-between">
+        <h1 className="font-serif italic text-[20px] font-light tracking-tight" style={{ color: "var(--text-primary)" }}>
           Scaled.
         </h1>
         <div className="flex items-center gap-0.5">
           <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 cursor-default"
+            onClick={onOpenSettings}
+            className="w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 cursor-default"
             style={{ color: "var(--text-muted)" }}
-            title={theme === "dark" ? "Light Mode" : "Dark Mode"}
+            title="Settings (Cmd+,)"
           >
-            {theme === "dark" ? <IconSun size={15} /> : <IconMoon size={15} />}
+            <IconSettings size={14} />
           </button>
           <button
-            onClick={onOpenSettings}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 cursor-default"
+            onClick={onCollapse}
+            className="w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 cursor-default"
             style={{ color: "var(--text-muted)" }}
-            title="Settings"
+            title="Collapse sidebar (Cmd+\\)"
           >
-            <IconSettings size={15} />
+            <IconSidebar size={14} />
           </button>
         </div>
       </div>
@@ -233,15 +239,15 @@ export default function Sidebar({
       {/* Search */}
       <div className="px-3 mb-2">
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }}>
-            <IconSearch size={13} />
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }}>
+            <IconSearch size={12} />
           </span>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search..."
-            className="w-full py-2 pl-8 pr-3 text-[13px] font-light rounded-lg outline-none transition-colors"
+            className="w-full py-1.5 pl-7 pr-3 text-[12px] font-light rounded-lg outline-none transition-colors"
             style={{
               backgroundColor: "var(--bg-tertiary)",
               border: "1px solid var(--border-color)",
@@ -252,16 +258,16 @@ export default function Sidebar({
       </div>
 
       {/* New Page */}
-      <div className="px-3 mb-3">
+      <div className="px-3 mb-2">
         <button
           onClick={onCreate}
-          className="w-full py-2.5 px-3 text-left text-[13px] font-light rounded-lg transition-all duration-200 cursor-default flex items-center gap-2.5"
+          className="w-full py-2 px-3 text-left text-[12px] font-light rounded-lg transition-all duration-200 cursor-default flex items-center gap-2"
           style={{
             border: "1px solid var(--border-color)",
             color: "var(--text-secondary)",
           }}
         >
-          <IconPlus size={14} />
+          <IconPlus size={13} />
           <span>New Page</span>
         </button>
       </div>
@@ -276,53 +282,47 @@ export default function Sidebar({
               className="flex items-center justify-center cursor-default"
               style={{ color: "var(--text-muted)" }}
             >
-              <IconFolderPlus size={13} />
+              <IconFolderPlus size={12} />
             </button>
           }
         >
           <div className="space-y-px">
-            {/* All Pages */}
             <button
               onClick={() => onWorkspaceChange("")}
-              className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-light flex items-center gap-2.5 cursor-default transition-colors"
+              className="w-full text-left px-3 py-1 rounded-md text-[12px] font-light flex items-center gap-2 cursor-default transition-colors"
               style={{
                 backgroundColor: activeWorkspace === "" ? "var(--bg-hover)" : "transparent",
                 color: activeWorkspace === "" ? "var(--text-primary)" : "var(--text-secondary)",
               }}
             >
-              <IconPages size={14} />
+              <IconPages size={13} />
               <span>All Pages</span>
             </button>
 
-            {/* User workspaces */}
             {workspaces.map((ws) => (
               <div key={ws.id} className="group flex items-center">
                 <button
                   onClick={() => onWorkspaceChange(ws.id)}
-                  className="flex-1 text-left px-3 py-1.5 rounded-lg text-[13px] font-light flex items-center gap-2.5 cursor-default transition-colors"
+                  className="flex-1 text-left px-3 py-1 rounded-md text-[12px] font-light flex items-center gap-2 cursor-default transition-colors"
                   style={{
                     backgroundColor: activeWorkspace === ws.id ? "var(--bg-hover)" : "transparent",
                     color: activeWorkspace === ws.id ? "var(--text-primary)" : "var(--text-secondary)",
                   }}
                 >
-                  <IconFolder size={14} />
+                  <IconFolder size={13} />
                   <span>{ws.name}</span>
-                  <span
-                    className="w-2 h-2 rounded-full ml-auto flex-shrink-0"
-                    style={{ backgroundColor: ws.color }}
-                  />
+                  <span className="w-1.5 h-1.5 rounded-full ml-auto flex-shrink-0" style={{ backgroundColor: ws.color }} />
                 </button>
                 <button
                   onClick={() => onDeleteWorkspace(ws.id)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity mr-1 cursor-default flex items-center"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  <IconX size={11} />
+                  <IconX size={10} />
                 </button>
               </div>
             ))}
 
-            {/* Create workspace inline */}
             <AnimatePresence>
               {creatingWs && (
                 <motion.div
@@ -331,13 +331,13 @@ export default function Sidebar({
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="flex items-center gap-1.5 px-3 py-1.5">
-                    <span className="flex-shrink-0" style={{ color: "var(--text-muted)" }}><IconFolder size={14} /></span>
+                  <div className="flex items-center gap-1.5 px-3 py-1">
+                    <span className="flex-shrink-0" style={{ color: "var(--text-muted)" }}><IconFolder size={13} /></span>
                     <input
                       ref={wsInputRef}
                       autoFocus
                       placeholder="Name..."
-                      className="flex-1 bg-transparent outline-none text-[13px] font-light"
+                      className="flex-1 bg-transparent outline-none text-[12px] font-light"
                       style={{ color: "var(--text-primary)" }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleCreateWs();
@@ -359,13 +359,14 @@ export default function Sidebar({
       {/* View Tabs */}
       <div className="px-3 mb-2 flex gap-1">
         {([
-          { key: "pages" as const, icon: <IconPage size={12} />, label: "Pages" },
-          { key: "trash" as const, icon: <IconTrash size={12} />, label: "Trash" },
+          { key: "pages" as const, icon: <IconPage size={11} />, label: "Pages" },
+          { key: "habits" as const, icon: <IconHabit size={11} />, label: "Habits" },
+          { key: "trash" as const, icon: <IconTrash size={11} />, label: "Trash" },
         ]).map((v) => (
           <button
             key={v.key}
             onClick={() => setView(v.key)}
-            className="flex-1 py-1.5 text-[11px] tracking-wider rounded-lg transition-colors cursor-default flex items-center justify-center gap-1.5"
+            className="flex-1 py-1.5 text-[10px] tracking-wider rounded-md transition-colors cursor-default flex items-center justify-center gap-1"
             style={{
               backgroundColor: view === v.key ? "var(--bg-tertiary)" : "transparent",
               color: view === v.key ? "var(--text-primary)" : "var(--text-muted)",
@@ -412,19 +413,44 @@ export default function Sidebar({
                 ))}
               </AnimatePresence>
               {notes.length === 0 && searchQuery && (
-                <p className="text-center text-[13px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
+                <p className="text-center text-[12px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
                   No results
                 </p>
               )}
               {notes.length === 0 && !searchQuery && (
-                <p className="text-center text-[13px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
+                <p className="text-center text-[12px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
                   No pages yet
                 </p>
               )}
             </CollapsibleSection>
           </>
+        ) : view === "habits" ? (
+          <div className="flex flex-col items-center py-6 gap-2">
+            <span style={{ color: "var(--text-muted)" }}><IconHabit size={20} /></span>
+            <p className="text-[12px] font-light" style={{ color: "var(--text-muted)" }}>
+              Habits & Stats
+            </p>
+            <p className="text-[10px] font-light italic" style={{ color: "var(--text-muted)" }}>
+              Shown in main area
+            </p>
+          </div>
         ) : (
           <div>
+            {trashedNotes.length > 0 && (
+              <div className="mb-2 px-1">
+                <button
+                  onClick={() => {
+                    if (confirm("Permanently delete all trashed items?")) {
+                      trashedNotes.forEach((n) => onPermanentDelete(n.id));
+                    }
+                  }}
+                  className="text-[10px] uppercase tracking-[0.08em] px-2 py-1 rounded-md cursor-default transition-colors"
+                  style={{ color: "var(--text-muted)", border: "1px solid var(--border-color)" }}
+                >
+                  Empty Trash
+                </button>
+              </div>
+            )}
             <AnimatePresence mode="popLayout">
               {trashedNotes.map((note) => (
                 <motion.div
@@ -437,35 +463,35 @@ export default function Sidebar({
                 >
                   <button
                     onClick={() => onSelect(note.id)}
-                    className="flex-1 text-left px-3 py-2 rounded-lg transition-colors cursor-default flex items-center gap-2.5"
+                    className="flex-1 text-left px-3 py-1.5 rounded-md transition-colors cursor-default flex items-center gap-2"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    <span style={{ color: "var(--text-muted)" }}><IconPage size={14} /></span>
+                    <span style={{ color: "var(--text-muted)" }}><IconPage size={13} /></span>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-light truncate">
+                      <div className="text-[12px] font-light truncate">
                         {note.title || "Untitled"}
                       </div>
-                      <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                      <div className="text-[9px] mt-0.5" style={{ color: "var(--text-muted)" }}>
                         {formatDate(note.updatedAt)}
                       </div>
                     </div>
                   </button>
-                  <div className="flex gap-1 flex-shrink-0 pr-2">
+                  <div className="flex gap-1 flex-shrink-0 pr-1">
                     <button
                       onClick={() => onRestore(note.id)}
-                      className="cursor-default flex items-center"
+                      className="cursor-default flex items-center p-0.5"
                       style={{ color: "var(--text-muted)" }}
                       title="Restore"
                     >
-                      <IconRestore size={13} />
+                      <IconRestore size={12} />
                     </button>
                     <button
-                      onClick={() => { if (confirm("Permanently delete?")) onPermanentDelete(note.id); }}
-                      className="cursor-default flex items-center"
+                      onClick={() => onPermanentDelete(note.id)}
+                      className="cursor-default flex items-center p-0.5"
                       style={{ color: "var(--text-muted)" }}
                       title="Delete forever"
                     >
-                      <IconX size={13} />
+                      <IconX size={12} />
                     </button>
                   </div>
                 </motion.div>
@@ -473,8 +499,8 @@ export default function Sidebar({
             </AnimatePresence>
             {trashedNotes.length === 0 && (
               <div className="flex flex-col items-center py-10 gap-2">
-                <IconTrash size={20} className="" />
-                <p className="text-[13px] font-light italic" style={{ color: "var(--text-muted)" }}>
+                <IconTrash size={18} />
+                <p className="text-[12px] font-light italic" style={{ color: "var(--text-muted)" }}>
                   Trash is empty
                 </p>
               </div>
@@ -484,10 +510,10 @@ export default function Sidebar({
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t flex items-center justify-between" style={{ borderColor: "var(--border-color)" }}>
+      <div className="px-3 py-2 border-t flex items-center justify-between" style={{ borderColor: "var(--border-color)" }}>
         <div className="flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
-          <IconPen size={11} />
-          <span className="text-[10px] tracking-[0.1em] uppercase font-medium">
+          <IconPen size={10} />
+          <span className="text-[9px] tracking-[0.1em] uppercase font-medium">
             {notes.length} {notes.length === 1 ? "page" : "pages"}
           </span>
         </div>

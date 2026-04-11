@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import {
   IconPage, IconMeeting, IconRocket, IconChart, IconJournal,
-  IconTarget, IconHandshake, IconLightning, IconX,
+  IconTarget, IconHandshake, IconLightning, IconX, IconTaskList,
 } from "./Icons";
 
 export interface Template {
@@ -82,6 +82,14 @@ const templates: Template[] = [
     icon: <IconLightning size={20} strokeWidth={1.3} />,
     defaultTitle: "Brainstorm",
     content: `<h2>Topic</h2><p></p><hr><h2>Ideas</h2><ul><li><p></p></li></ul><h2>Best Ideas to Explore</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p></p></div></li></ul>`,
+  },
+  {
+    id: "todo",
+    name: "To-Do List",
+    description: "Organize tasks by priority",
+    icon: <IconTaskList size={20} strokeWidth={1.3} />,
+    defaultTitle: "To-Do List",
+    content: `<h2>High Priority</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p>Important task</p></div></li><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p></p></div></li></ul><h2>Medium Priority</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p></p></div></li></ul><h2>Low Priority</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><label><input type="checkbox"></label><div><p></p></div></li></ul><hr><h2>Done</h2><ul data-type="taskList"><li data-type="taskItem" data-checked="true"><label><input type="checkbox"></label><div><p></p></div></li></ul>`,
   },
 ];
 
