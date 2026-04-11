@@ -4,6 +4,7 @@ import type { Note, Workspace } from "../lib/storage";
 import {
   IconPlus, IconCheck, IconTarget, IconChart,
   IconTrash, IconChevron, IconLightning, IconPen, IconPage, IconSparkle,
+  IconMoodAwful, IconMoodBad, IconMoodOkay, IconMoodGood, IconMoodGreat,
 } from "./Icons";
 
 // Types
@@ -76,11 +77,11 @@ function getStreak(habitId: string, completions: HabitCompletion): number {
 }
 
 const MOOD_LEVELS = [
-  { score: 1, label: "Awful", color: "#ef4444" },
-  { score: 2, label: "Bad", color: "#f97316" },
-  { score: 3, label: "Okay", color: "#eab308" },
-  { score: 4, label: "Good", color: "#22c55e" },
-  { score: 5, label: "Great", color: "#10b981" },
+  { score: 1, label: "Awful", color: "#ef4444", Icon: IconMoodAwful },
+  { score: 2, label: "Bad", color: "#f97316", Icon: IconMoodBad },
+  { score: 3, label: "Okay", color: "#eab308", Icon: IconMoodOkay },
+  { score: 4, label: "Good", color: "#22c55e", Icon: IconMoodGood },
+  { score: 5, label: "Great", color: "#10b981", Icon: IconMoodGreat },
 ];
 
 const MOOD_PERIODS = ["morning", "midday", "evening"] as const;
@@ -428,16 +429,12 @@ export default function HabitTracker({
 
           {/* Habits List */}
           <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid var(--border-color)" }}>
-            <AnimatePresence>
               {habits.map((habit, i) => {
                 const completed = completions[selectedDate]?.[habit.id] || false;
                 const streak = getStreak(habit.id, completions);
                 return (
-                  <motion.div
+                  <div
                     key={habit.id}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
                     className="flex items-center gap-3 px-3 py-2.5 group"
                     style={{
                       backgroundColor: "var(--bg-secondary)",
@@ -475,10 +472,9 @@ export default function HabitTracker({
                     >
                       <IconTrash size={11} />
                     </button>
-                  </motion.div>
+                  </div>
                 );
               })}
-            </AnimatePresence>
 
             {showAddHabit ? (
               <div className="flex items-center gap-3 px-3 py-2.5" style={{ backgroundColor: "var(--bg-secondary)" }}>
@@ -533,7 +529,7 @@ export default function HabitTracker({
                       <button
                         key={level.score}
                         onClick={() => setMoodScore(period, level.score)}
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] cursor-default transition-all"
+                        className="w-7 h-7 rounded-full flex items-center justify-center cursor-default transition-all"
                         style={{
                           backgroundColor: entry?.score === level.score ? level.color : "var(--bg-tertiary)",
                           color: entry?.score === level.score ? "#000" : "var(--text-muted)",
@@ -542,7 +538,7 @@ export default function HabitTracker({
                         }}
                         title={level.label}
                       >
-                        {level.score}
+                        <level.Icon size={14} />
                       </button>
                     ))}
                   </div>

@@ -131,7 +131,7 @@ export default function Settings({ onClose }: SettingsProps) {
           {/* About */}
           <Section title="ABOUT">
             <div className="text-[13px] space-y-2" style={{ color: "var(--text-muted)" }}>
-              <p><span style={{ color: "var(--text-primary)" }} className="font-serif italic">Scaled.</span> <span className="text-[11px] font-mono">v0.4.0</span></p>
+              <p><span style={{ color: "var(--text-primary)" }} className="font-serif italic">Scaled.</span> <span className="text-[11px] font-mono">v0.5.0</span></p>
               <p>Built by ScaledByMika</p>
               <p className="font-serif italic text-[14px]" style={{ color: "var(--text-secondary)" }}>
                 "Your space to think, write, and build."

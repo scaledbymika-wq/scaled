@@ -253,3 +253,25 @@ export function IconHabit(p: IconProps) {
 export function IconSidebar(p: IconProps) {
   return <I {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="3" x2="9" y2="21" /></I>;
 }
+
+// — Mood Faces —
+
+export function IconMoodAwful(p: IconProps) {
+  return <I {...p}><circle cx="12" cy="12" r="10" /><path d="M16 16s-1.5-2-4-2-4 2-4 2" /><line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5" /><line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" /></I>;
+}
+
+export function IconMoodBad(p: IconProps) {
+  return <I {...p}><circle cx="12" cy="12" r="10" /><path d="M16 16c-.5-1-1.5-2-4-2s-3.5 1-4 2" /><line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5" /><line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" /></I>;
+}
+
+export function IconMoodOkay(p: IconProps) {
+  return <I {...p}><circle cx="12" cy="12" r="10" /><line x1="8" y1="15" x2="16" y2="15" /><line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5" /><line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" /></I>;
+}
+
+export function IconMoodGood(p: IconProps) {
+  return <I {...p}><circle cx="12" cy="12" r="10" /><path d="M8 14c.5 1 1.5 2 4 2s3.5-1 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5" /><line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" /></I>;
+}
+
+export function IconMoodGreat(p: IconProps) {
+  return <I {...p}><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5" /><line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" /></I>;
+}
