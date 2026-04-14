@@ -4,7 +4,7 @@
   "pub_date": "2026-04-14T00:00:00Z",
   "platforms": {
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSTVRzOHBBMEMzVkhaRkVlYjhCVDNSUW9razhlOHhCR1RiU2tZdE96bzNNMUhZa1dOVyt2N3EyK1JzcXRUL0pzd05vQ2dwZEJ4K0l2dW1yVlhzS0pLemVmeFlFdzhDendzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc2MTkxMDcyCWZpbGU6U2NhbGVkLmFwcC50YXIuZ3oKL3c5TitRZGhFYTRIK0thcEtzbGUyM0Z6TnRzbTMrNjJlNGMzTHdDd2ZHc0pKaVVmcjNLdExRd1FSYTN2c3NjUmJ0NWtCa2FTcjI1eXd4ZUhwMnFuRGc9PQo=",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSTVRzOHBBMEMzVkEwSllnb1EvTkNGekFJcGczK3VJY1RjdnFVMmFhNGgyelR3VjYrYWVWTFBGQXV1WFVmL0EyOUh3N3ZpU3BhNGU0bWRkcHJrb2tYZHVEdEduSCsrR3dJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc2MTkxODI2CWZpbGU6U2NhbGVkLmFwcC50YXIuZ3oKK25qa0ZCcTZ4OWZTbXlBM085bnpROUpJYUJaMHIzeTBwd241QUtyNmNkRFUrdDNzZDdrYzMyVFdhQ2RaU1FIWjdWV0R6QTRac1hhSmZhUFN3UE1jQkE9PQo=",
       "url": "https://github.com/scaledbymika-wq/scaled/releases/download/v0.5.0/Scaled.app.tar.gz"
     }
   }
