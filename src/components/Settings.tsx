@@ -35,7 +35,7 @@ export default function Settings({ onClose }: SettingsProps) {
         <div className="p-6 border-b flex items-center justify-between" style={{ borderColor: "var(--border-color)" }}>
           <div className="flex items-center gap-3">
             <span
-              className="w-8 h-8 rounded-xl flex items-center justify-center"
+              className="w-8 h-8 rounded-2xl flex items-center justify-center"
               style={{ backgroundColor: "var(--bg-tertiary)", color: "var(--text-secondary)" }}
             >
               <IconPalette size={16} />
@@ -46,7 +46,7 @@ export default function Settings({ onClose }: SettingsProps) {
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-default"
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-default"
             style={{ color: "var(--text-muted)" }}
           >
             <IconX size={16} />
@@ -79,7 +79,7 @@ export default function Settings({ onClose }: SettingsProps) {
                   <button
                     key={size}
                     onClick={() => updateSettings({ fontSize: size })}
-                    className="px-3 py-1.5 text-[12px] rounded-lg border transition-all cursor-default capitalize"
+                    className="px-3 py-1.5 text-[12px] rounded-xl border transition-all cursor-default capitalize"
                     style={{
                       borderColor: settings.fontSize === size ? "#10b981" : "var(--border-color)",
                       color: settings.fontSize === size ? "#10b981" : "var(--text-secondary)",
@@ -98,7 +98,7 @@ export default function Settings({ onClose }: SettingsProps) {
                   <button
                     key={w}
                     onClick={() => updateSettings({ editorWidth: w })}
-                    className="px-3 py-1.5 text-[12px] rounded-lg border transition-all cursor-default capitalize"
+                    className="px-3 py-1.5 text-[12px] rounded-xl border transition-all cursor-default capitalize"
                     style={{
                       borderColor: settings.editorWidth === w ? "#10b981" : "var(--border-color)",
                       color: settings.editorWidth === w ? "#10b981" : "var(--text-secondary)",
@@ -180,7 +180,7 @@ function ThemeButton({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 px-3.5 py-2 rounded-xl border transition-all cursor-default"
+      className="flex items-center gap-2 px-3.5 py-2 rounded-2xl border transition-all cursor-default"
       style={{
         borderColor: active ? "#10b981" : "var(--border-color)",
         backgroundColor: active ? "rgba(16,185,129,0.06)" : "transparent",

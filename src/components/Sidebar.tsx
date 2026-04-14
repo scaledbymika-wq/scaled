@@ -121,7 +121,7 @@ function NoteItem({
     >
       <button
         onClick={onSelect}
-        className="w-full text-left px-3 py-1.5 rounded-lg mb-px cursor-default transition-all duration-150 group flex items-center gap-2"
+        className="w-full text-left px-3 py-1.5 rounded-xl mb-px cursor-default transition-all duration-100 group flex items-center gap-2"
         style={{
           backgroundColor: isActive ? "var(--bg-hover)" : "transparent",
           color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
@@ -247,7 +247,7 @@ export default function Sidebar({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search..."
-            className="w-full py-1.5 pl-7 pr-3 text-[12px] font-light rounded-lg outline-none transition-colors"
+            className="w-full py-1.5 pl-7 pr-3 text-[12px] font-light rounded-xl outline-none transition-colors"
             style={{
               backgroundColor: "var(--bg-tertiary)",
               border: "1px solid var(--border-color)",
@@ -261,7 +261,7 @@ export default function Sidebar({
       <div className="px-3 mb-2">
         <button
           onClick={onCreate}
-          className="w-full py-2 px-3 text-left text-[12px] font-light rounded-lg transition-all duration-200 cursor-default flex items-center gap-2"
+          className="w-full py-2 px-3 text-left text-[12px] font-light rounded-xl transition-all duration-100 cursor-default flex items-center gap-2"
           style={{
             border: "1px solid var(--border-color)",
             color: "var(--text-secondary)",
@@ -366,7 +366,7 @@ export default function Sidebar({
           <button
             key={v.key}
             onClick={() => setView(v.key)}
-            className="flex-1 py-1.5 text-[10px] tracking-wider rounded-md transition-colors cursor-default flex items-center justify-center gap-1"
+            className="flex-1 py-1.5 text-[10px] tracking-wider rounded-xl transition-colors duration-100 cursor-default flex items-center justify-center gap-1"
             style={{
               backgroundColor: view === v.key ? "var(--bg-tertiary)" : "transparent",
               color: view === v.key ? "var(--text-primary)" : "var(--text-muted)",

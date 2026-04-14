@@ -21,37 +21,47 @@
 
 /* ========== THEME VARIABLES ========== */
 :root, [data-theme="dark"] {
-  --bg-primary: #0c0c0c;
-  --bg-secondary: #141414;
-  --bg-tertiary: #1c1c1c;
-  --bg-surface: #181818;
-  --bg-hover: #222222;
-  --text-primary: #e4e4e7;
-  --text-secondary: #a1a1aa;
-  --text-muted: #636369;
-  --border-color: #2a2a2e;
-  --border-strong: #3a3a3f;
-  --sidebar-bg: rgba(12, 12, 12, 0.85);
-  --card-bg: #161616;
-  --code-bg: #141414;
-  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --bg-primary: #09090b;
+  --bg-secondary: #131316;
+  --bg-tertiary: #1a1a1f;
+  --bg-surface: #161619;
+  --bg-hover: #1f1f24;
+  --bg-elevated: #1e1e23;
+  --text-primary: #ececef;
+  --text-secondary: #a0a0a8;
+  --text-muted: #56565e;
+  --border-color: #232328;
+  --border-strong: #2e2e35;
+  --sidebar-bg: rgba(9, 9, 11, 0.88);
+  --card-bg: #141417;
+  --code-bg: #111114;
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
 }
 
 [data-theme="light"] {
   --bg-primary: #ffffff;
-  --bg-secondary: #f8f8f8;
-  --bg-tertiary: #f0f0f0;
-  --bg-surface: #f5f5f5;
-  --bg-hover: #ebebeb;
-  --text-primary: #1a1a1a;
-  --text-secondary: #555555;
-  --text-muted: #999999;
-  --border-color: #e2e2e5;
-  --border-strong: #d0d0d5;
-  --sidebar-bg: rgba(248, 248, 248, 0.9);
+  --bg-secondary: #f7f7f8;
+  --bg-tertiary: #ededf0;
+  --bg-surface: #f3f3f5;
+  --bg-hover: #e8e8ec;
+  --bg-elevated: #ffffff;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+  --border-color: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --sidebar-bg: rgba(255, 255, 255, 0.92);
   --card-bg: #ffffff;
-  --code-bg: #f5f5f5;
-  --shadow: 0 8px 32px rgba(0,0,0,0.08);
+  --code-bg: #f4f4f5;
+  --shadow: 0 8px 32px rgba(0,0,0,0.06);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
 }
 
 /* ========== BASE ========== */
@@ -144,7 +154,7 @@ html, body, #root {
 .tiptap pre {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 1em;
   margin: 1.5em 0;
   overflow-x: auto;
@@ -230,7 +240,7 @@ html, body, #root {
 .tiptap img {
   max-width: 100%;
   height: auto;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   margin: 1.5em 0;
   cursor: default;
   box-shadow: var(--shadow);
@@ -246,7 +256,7 @@ html, body, #root {
   border-collapse: collapse;
   width: 100%;
   margin: 1.5em 0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 

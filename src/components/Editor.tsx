@@ -236,7 +236,7 @@ export default function Editor({
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
             <button
               onClick={handleCoverUpload}
-              className="px-3 py-1.5 text-[11px] backdrop-blur rounded-lg transition-colors"
+              className="px-3 py-1.5 text-[11px] backdrop-blur rounded-xl transition-colors"
               style={{
                 backgroundColor: "rgba(0,0,0,0.5)",
                 border: "1px solid var(--border-color)",
@@ -247,7 +247,7 @@ export default function Editor({
             </button>
             <button
               onClick={() => onCoverChange("")}
-              className="px-3 py-1.5 text-[11px] backdrop-blur rounded-lg transition-colors"
+              className="px-3 py-1.5 text-[11px] backdrop-blur rounded-xl transition-colors"
               style={{
                 backgroundColor: "rgba(0,0,0,0.5)",
                 border: "1px solid var(--border-color)",

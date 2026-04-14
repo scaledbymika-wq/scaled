@@ -131,7 +131,7 @@ export default function TemplatePicker({ onSelect, onClose }: TemplatePickerProp
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center cursor-default"
+            className="w-8 h-8 rounded-xl flex items-center justify-center cursor-default"
             style={{ color: "var(--text-muted)" }}
           >
             <IconX size={16} />
@@ -145,11 +145,11 @@ export default function TemplatePicker({ onSelect, onClose }: TemplatePickerProp
               <button
                 key={tmpl.id}
                 onClick={() => onSelect(tmpl)}
-                className="text-left p-4 rounded-xl transition-all duration-200 cursor-default group"
+                className="text-left p-4 rounded-2xl transition-all duration-100 cursor-default group"
                 style={{ border: "1px solid var(--border-color)" }}
               >
                 <span
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center mb-3"
                   style={{
                     backgroundColor: "var(--bg-tertiary)",
                     border: "1px solid var(--border-color)",

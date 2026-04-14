@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import type { Note, Workspace } from "../lib/storage";
 import {
   IconPlus, IconCheck, IconTarget, IconChart,
@@ -289,7 +289,7 @@ export default function HabitTracker({
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <span
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            className="w-10 h-10 rounded-2xl flex items-center justify-center"
             style={{ backgroundColor: "rgba(16,185,129,0.1)", color: "#10b981" }}
           >
             <IconSparkle size={20} />
@@ -317,7 +317,7 @@ export default function HabitTracker({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
-              className={`p-3 rounded-xl ${stat.clickable ? "cursor-default" : ""}`}
+              className={`p-3 rounded-2xl ${stat.clickable ? "cursor-default" : ""}`}
               style={{
                 backgroundColor: "var(--bg-secondary)",
                 border: "1px solid var(--border-color)",
@@ -337,7 +337,7 @@ export default function HabitTracker({
 
         {/* Writing Heatmap */}
         <div
-          className="rounded-xl p-4 mb-6"
+          className="rounded-2xl p-4 mb-6"
           style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)" }}
         >
           <div className="flex items-center gap-2 mb-3">
@@ -428,7 +428,7 @@ export default function HabitTracker({
           )}
 
           {/* Habits List */}
-          <div className="flex-1 rounded-xl overflow-hidden" style={{ border: "1px solid var(--border-color)" }}>
+          <div className="flex-1 rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-color)" }}>
               {habits.map((habit, i) => {
                 const completed = completions[selectedDate]?.[habit.id] || false;
                 const streak = getStreak(habit.id, completions);
@@ -518,7 +518,7 @@ export default function HabitTracker({
               return (
                 <div
                   key={period}
-                  className="rounded-xl p-3"
+                  className="rounded-2xl p-3"
                   style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)" }}
                 >
                   <p className="text-[9px] uppercase tracking-[0.08em] mb-2 text-center capitalize" style={{ color: "var(--text-muted)" }}>
@@ -556,7 +556,7 @@ export default function HabitTracker({
         {/* Habit Consistency Heatmap */}
         {habits.length > 0 && (
           <div
-            className="rounded-xl p-4 mb-6"
+            className="rounded-2xl p-4 mb-6"
             style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)" }}
           >
             <div className="flex items-center gap-2 mb-3">
@@ -590,7 +590,7 @@ export default function HabitTracker({
           {/* 30-Day Completion */}
           {habits.length > 0 && (
             <div
-              className="rounded-xl p-4"
+              className="rounded-2xl p-4"
               style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)" }}
             >
               <div className="flex items-center gap-2 mb-3">
@@ -622,7 +622,7 @@ export default function HabitTracker({
           {/* Mood Chart */}
           {moodChart.some((d) => d.avg !== null) && (
             <div
-              className="rounded-xl p-4"
+              className="rounded-2xl p-4"
               style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)" }}
             >
               <div className="flex items-center gap-2 mb-3">
@@ -667,7 +667,7 @@ export default function HabitTracker({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 + i * 0.02 }}
                   onClick={() => onSelectNote(note.id)}
-                  className="w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 cursor-default transition-colors"
+                  className="w-full text-left px-3 py-2 rounded-2xl flex items-center gap-2.5 cursor-default transition-colors"
                   style={{ border: "1px solid var(--border-color)" }}
                 >
                   {note.icon ? (

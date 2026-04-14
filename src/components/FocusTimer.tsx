@@ -133,7 +133,7 @@ export default function FocusTimer({ open, onClose }: FocusTimerProps) {
                 <button
                   key={m}
                   onClick={() => switchMode(m)}
-                  className="px-3 py-1 text-[12px] rounded-lg transition-all cursor-default capitalize"
+                  className="px-3 py-1 text-[12px] rounded-xl transition-all cursor-default capitalize"
                   style={{
                     backgroundColor: mode === m ? "rgba(16,185,129,0.1)" : "transparent",
                     color: mode === m ? "#10b981" : "var(--text-muted)",
@@ -186,7 +186,7 @@ export default function FocusTimer({ open, onClose }: FocusTimerProps) {
             <div className="flex items-center justify-center gap-3 pb-6">
               <button
                 onClick={resetTimer}
-                className="px-4 py-2 text-[12px] rounded-xl cursor-default transition-all"
+                className="px-4 py-2 text-[12px] rounded-2xl cursor-default transition-all"
                 style={{
                   border: "1px solid var(--border-color)",
                   color: "var(--text-secondary)",
@@ -196,7 +196,7 @@ export default function FocusTimer({ open, onClose }: FocusTimerProps) {
               </button>
               <button
                 onClick={toggleTimer}
-                className="px-8 py-2.5 text-[13px] font-medium rounded-xl cursor-default transition-all"
+                className="px-8 py-2.5 text-[13px] font-medium rounded-2xl cursor-default transition-all"
                 style={{
                   backgroundColor: running ? "var(--bg-tertiary)" : "#10b981",
                   color: running ? "var(--text-primary)" : "#000",

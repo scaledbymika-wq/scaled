@@ -201,7 +201,7 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
 
     return (
       <div
-        className="rounded-xl overflow-hidden w-[280px] max-h-[320px] overflow-y-auto py-1"
+        className="rounded-2xl overflow-hidden w-[280px] max-h-[320px] overflow-y-auto py-1"
         style={{
           backgroundColor: "var(--card-bg)",
           border: "1px solid var(--border-color)",
@@ -219,7 +219,7 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
             }}
           >
             <span
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{
                 backgroundColor: "var(--bg-tertiary)",
                 border: "1px solid var(--border-color)",
