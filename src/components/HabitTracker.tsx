@@ -175,7 +175,11 @@ export default function HabitTracker({
 
   const addHabit = () => {
     const name = newHabitName.trim();
-    if (!name) return;
+    if (!name) {
+      setShowAddHabit(false);
+      setNewHabitName("");
+      return;
+    }
     const habit: Habit = { id: crypto.randomUUID(), name, createdAt: Date.now() };
     const updated = [...habits, habit];
     setHabits(updated);
@@ -435,42 +439,43 @@ export default function HabitTracker({
                 return (
                   <div
                     key={habit.id}
-                    className="flex items-center gap-3 px-3 py-2.5 group"
+                    className="flex items-center gap-3 px-3 py-3 group"
                     style={{
                       backgroundColor: "var(--bg-secondary)",
                       borderBottom: i < habits.length - 1 ? "1px solid var(--border-color)" : "none",
                     }}
                   >
                     <button
-                      onClick={() => toggleCompletion(habit.id)}
-                      className="w-[18px] h-[18px] rounded-md flex items-center justify-center flex-shrink-0 transition-all cursor-default"
+                      onClick={(e) => { e.stopPropagation(); toggleCompletion(habit.id); }}
+                      className="w-[22px] h-[22px] rounded-lg flex items-center justify-center flex-shrink-0 transition-all cursor-default"
                       style={{
                         border: completed ? "none" : "1.5px solid var(--border-color)",
                         backgroundColor: completed ? "#10b981" : "transparent",
                       }}
                     >
-                      {completed && <IconCheck size={11} strokeWidth={2.5} className="text-black" />}
+                      {completed && <IconCheck size={12} strokeWidth={2.5} className="text-black" />}
                     </button>
-                    <span
-                      className="flex-1 text-[12px] font-light transition-all"
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleCompletion(habit.id); }}
+                      className="flex-1 text-left text-[13px] font-light transition-all cursor-default"
                       style={{
                         color: completed ? "var(--text-muted)" : "var(--text-primary)",
                         textDecoration: completed ? "line-through" : "none",
                       }}
                     >
                       {habit.name}
-                    </span>
+                    </button>
                     {streak > 0 && (
                       <span className="flex items-center gap-0.5 text-[10px] tabular-nums" style={{ color: "#10b981" }}>
                         <IconLightning size={10} />{streak}d
                       </span>
                     )}
                     <button
-                      onClick={() => deleteHabit(habit.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity cursor-default"
+                      onClick={(e) => { e.stopPropagation(); deleteHabit(habit.id); }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity cursor-default p-1"
                       style={{ color: "var(--text-muted)" }}
                     >
-                      <IconTrash size={11} />
+                      <IconTrash size={12} />
                     </button>
                   </div>
                 );
@@ -484,10 +489,15 @@ export default function HabitTracker({
                   value={newHabitName}
                   onChange={(e) => setNewHabitName(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") addHabit();
+                    if (e.key === "Enter") { e.preventDefault(); addHabit(); }
                     if (e.key === "Escape") { setShowAddHabit(false); setNewHabitName(""); }
                   }}
-                  onBlur={() => { if (!newHabitName.trim()) setShowAddHabit(false); }}
+                  onBlur={() => {
+                    // Small delay so click on other elements registers first
+                    setTimeout(() => {
+                      addHabit();
+                    }, 150);
+                  }}
                   autoFocus
                   placeholder="New habit..."
                   className="flex-1 bg-transparent outline-none text-[12px] font-light"
