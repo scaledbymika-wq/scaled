@@ -1,11 +1,11 @@
 {
-  "version": "0.4.0",
-  "notes": "Habits, Zen Mode, Dashboard, Focus Timer, Command Palette, Collapsible Sidebar, Text Alignment, Typewriter Scrolling, Image URL Auto-Embed",
-  "pub_date": "2026-04-11T00:00:00Z",
+  "version": "0.5.0",
+  "notes": "Fix habit clicks, mood face icons, dark-on-dark UI redesign with deeper contrast and rounder corners",
+  "pub_date": "2026-04-14T00:00:00Z",
   "platforms": {
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUldSTVRzOHBBMEMzVk9RWkpTVklkZDlKV3FjMjVDK29JY3diMlBSRDZIWFJhSXQxeU94dTZSOXhOUmYrbG1PWStFQ2wvaVdQcy9Ta1Y4L2FScG5ibHRuLzBoZmlvYURucEFnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc1ODkzMzE3CWZpbGU6U2NhbGVkLmFwcC50YXIuZ3oKRElNME8zTVNsV0RuWkZ5WWdQVnlwUGJYaU42TW84Qms0cHlROWFRN3NuYTVoMk1vazQ0ZVdnSlhzQmNLYmNhdThWeFJab1h5NW85ZlRVN09KVk4xQ2c9PQo=",
-      "url": "https://github.com/scaledbymika-wq/scaled/releases/download/v0.4.0/Scaled.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSTVRzOHBBMEMzVkhaRkVlYjhCVDNSUW9razhlOHhCR1RiU2tZdE96bzNNMUhZa1dOVyt2N3EyK1JzcXRUL0pzd05vQ2dwZEJ4K0l2dW1yVlhzS0pLemVmeFlFdzhDendzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc2MTkxMDcyCWZpbGU6U2NhbGVkLmFwcC50YXIuZ3oKL3c5TitRZGhFYTRIK0thcEtzbGUyM0Z6TnRzbTMrNjJlNGMzTHdDd2ZHc0pKaVVmcjNLdExRd1FSYTN2c3NjUmJ0NWtCa2FTcjI1eXd4ZUhwMnFuRGc9PQo=",
+      "url": "https://github.com/scaledbymika-wq/scaled/releases/download/v0.5.0/Scaled.app.tar.gz"
     }
   }
 }
