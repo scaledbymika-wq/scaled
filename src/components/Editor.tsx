@@ -206,6 +206,30 @@ export default function Editor({
     [onCoverChange]
   );
 
+  // Prevent browser from navigating to dropped files (shows fullscreen image)
+  useEffect(() => {
+    const preventDrop = (e: DragEvent) => {
+      // Only prevent if dropped outside the tiptap editor
+      const target = e.target as HTMLElement;
+      if (!target.closest(".tiptap")) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    const preventDragOver = (e: DragEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".tiptap")) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener("drop", preventDrop, true);
+    document.addEventListener("dragover", preventDragOver, true);
+    return () => {
+      document.removeEventListener("drop", preventDrop, true);
+      document.removeEventListener("dragover", preventDragOver, true);
+    };
+  }, []);
+
   const EMOJI_LIST = [
     "\ud83d\udcdd", "\ud83d\ude80", "\ud83d\udca1", "\ud83c\udfaf", "\ud83d\udd25",
     "\u2b50", "\ud83d\udcda", "\ud83d\udee0\ufe0f", "\ud83c\udf1f", "\ud83d\udcbc",

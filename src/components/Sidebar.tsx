@@ -4,10 +4,8 @@ import type { Note, Workspace } from "../lib/storage";
 import {
   IconSearch, IconPlus, IconChevron, IconSettings,
   IconStar, IconStarFilled, IconTrash, IconPage, IconPages,
-  IconFolder, IconFolderPlus, IconX, IconRestore, IconPen, IconSidebar, IconHabit,
+  IconFolder, IconFolderPlus, IconX, IconRestore, IconPen, IconSidebar,
 } from "./Icons";
-
-type SidebarView = "pages" | "trash" | "habits";
 
 interface SidebarProps {
   notes: Note[];
@@ -30,8 +28,6 @@ interface SidebarProps {
   onDeleteWorkspace: (id: string) => void;
   onAssignWorkspace: (noteId: string, workspaceId: string) => void;
   onCollapse: () => void;
-  activeView: string;
-  onViewChange: (view: string) => void;
 }
 
 function formatDate(ts: number) {
@@ -181,14 +177,10 @@ export default function Sidebar({
   onCreateWorkspace,
   onDeleteWorkspace,
   onCollapse,
-  activeView,
-  onViewChange,
 }: SidebarProps) {
   const [creatingWs, setCreatingWs] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
   const wsInputRef = useRef<HTMLInputElement>(null);
-
-  const view = (activeView === "habits" ? "habits" : activeView === "trash" ? "trash" : "pages") as SidebarView;
-  const setView = (v: SidebarView) => onViewChange(v);
 
   const handleCreateWs = () => {
     const name = wsInputRef.current?.value.trim();
@@ -258,7 +250,7 @@ export default function Sidebar({
       </div>
 
       {/* New Page */}
-      <div className="px-3 mb-2">
+      <div className="px-3 mb-3">
         <button
           onClick={onCreate}
           className="w-full py-2 px-3 text-left text-[12px] font-light rounded-xl transition-all duration-100 cursor-default flex items-center gap-2"
@@ -272,185 +264,154 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* Workspaces */}
-      <div className="px-3 mb-1">
-        <CollapsibleSection
-          title="Workspaces"
-          action={
-            <button
-              onClick={() => setCreatingWs(true)}
-              className="flex items-center justify-center cursor-default"
-              style={{ color: "var(--text-muted)" }}
-            >
-              <IconFolderPlus size={12} />
-            </button>
-          }
-        >
-          <div className="space-y-px">
-            <button
-              onClick={() => onWorkspaceChange("")}
-              className="w-full text-left px-3 py-1 rounded-md text-[12px] font-light flex items-center gap-2 cursor-default transition-colors"
-              style={{
-                backgroundColor: activeWorkspace === "" ? "var(--bg-hover)" : "transparent",
-                color: activeWorkspace === "" ? "var(--text-primary)" : "var(--text-secondary)",
-              }}
-            >
-              <IconPages size={13} />
-              <span>All Pages</span>
-            </button>
-
-            {workspaces.map((ws) => (
-              <div key={ws.id} className="group flex items-center">
-                <button
-                  onClick={() => onWorkspaceChange(ws.id)}
-                  className="flex-1 text-left px-3 py-1 rounded-md text-[12px] font-light flex items-center gap-2 cursor-default transition-colors"
-                  style={{
-                    backgroundColor: activeWorkspace === ws.id ? "var(--bg-hover)" : "transparent",
-                    color: activeWorkspace === ws.id ? "var(--text-primary)" : "var(--text-secondary)",
-                  }}
-                >
-                  <IconFolder size={13} />
-                  <span>{ws.name}</span>
-                  <span className="w-1.5 h-1.5 rounded-full ml-auto flex-shrink-0" style={{ backgroundColor: ws.color }} />
-                </button>
-                <button
-                  onClick={() => onDeleteWorkspace(ws.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity mr-1 cursor-default flex items-center"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  <IconX size={10} />
-                </button>
-              </div>
-            ))}
-
-            <AnimatePresence>
-              {creatingWs && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="flex items-center gap-1.5 px-3 py-1">
-                    <span className="flex-shrink-0" style={{ color: "var(--text-muted)" }}><IconFolder size={13} /></span>
-                    <input
-                      ref={wsInputRef}
-                      autoFocus
-                      placeholder="Name..."
-                      className="flex-1 bg-transparent outline-none text-[12px] font-light"
-                      style={{ color: "var(--text-primary)" }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleCreateWs();
-                        if (e.key === "Escape") setCreatingWs(false);
-                      }}
-                      onBlur={() => {
-                        handleCreateWs();
-                        setCreatingWs(false);
-                      }}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </CollapsibleSection>
-      </div>
-
-      {/* View Tabs */}
-      <div className="px-3 mb-2 flex gap-1">
-        {([
-          { key: "pages" as const, icon: <IconPage size={11} />, label: "Pages" },
-          { key: "habits" as const, icon: <IconHabit size={11} />, label: "Habits" },
-          { key: "trash" as const, icon: <IconTrash size={11} />, label: "Trash" },
-        ]).map((v) => (
-          <button
-            key={v.key}
-            onClick={() => setView(v.key)}
-            className="flex-1 py-1.5 text-[10px] tracking-wider rounded-xl transition-colors duration-100 cursor-default flex items-center justify-center gap-1"
-            style={{
-              backgroundColor: view === v.key ? "var(--bg-tertiary)" : "transparent",
-              color: view === v.key ? "var(--text-primary)" : "var(--text-muted)",
-            }}
-          >
-            {v.icon}
-            <span className="uppercase">{v.label}</span>
-          </button>
-        ))}
-      </div>
-
       {/* Content */}
       <nav className="flex-1 overflow-y-auto px-2">
-        {view === "pages" ? (
-          <>
-            {favorites.length > 0 && !searchQuery && (
-              <CollapsibleSection title="Favorites" count={favorites.length}>
-                <AnimatePresence mode="popLayout">
-                  {favorites.map((note) => (
-                    <NoteItem
-                      key={`fav-${note.id}`}
-                      note={note}
-                      isActive={activeId === note.id}
-                      onSelect={() => onSelect(note.id)}
-                      onDelete={() => onDelete(note.id)}
-                      onToggleFavorite={() => onToggleFavorite(note.id)}
-                    />
-                  ))}
-                </AnimatePresence>
-              </CollapsibleSection>
-            )}
-
-            <CollapsibleSection title={searchQuery ? "Results" : "Pages"} count={notes.length}>
-              <AnimatePresence mode="popLayout">
-                {notes.map((note) => (
-                  <NoteItem
-                    key={note.id}
-                    note={note}
-                    isActive={activeId === note.id}
-                    onSelect={() => onSelect(note.id)}
-                    onDelete={() => onDelete(note.id)}
-                    onToggleFavorite={() => onToggleFavorite(note.id)}
-                  />
-                ))}
-              </AnimatePresence>
-              {notes.length === 0 && searchQuery && (
-                <p className="text-center text-[12px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
-                  No results
-                </p>
-              )}
-              {notes.length === 0 && !searchQuery && (
-                <p className="text-center text-[12px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
-                  No pages yet
-                </p>
-              )}
-            </CollapsibleSection>
-          </>
-        ) : view === "habits" ? (
-          <div className="flex flex-col items-center py-6 gap-2">
-            <span style={{ color: "var(--text-muted)" }}><IconHabit size={20} /></span>
-            <p className="text-[12px] font-light" style={{ color: "var(--text-muted)" }}>
-              Habits & Stats
-            </p>
-            <p className="text-[10px] font-light italic" style={{ color: "var(--text-muted)" }}>
-              Shown in main area
-            </p>
-          </div>
-        ) : (
-          <div>
-            {trashedNotes.length > 0 && (
-              <div className="mb-2 px-1">
+        {/* Workspaces — only show when multiple exist */}
+        {workspaces.length > 0 && (
+          <div className="mb-1">
+            <CollapsibleSection
+              title="Workspaces"
+              action={
                 <button
-                  onClick={() => {
-                    if (confirm("Permanently delete all trashed items?")) {
-                      trashedNotes.forEach((n) => onPermanentDelete(n.id));
-                    }
-                  }}
-                  className="text-[10px] uppercase tracking-[0.08em] px-2 py-1 rounded-md cursor-default transition-colors"
-                  style={{ color: "var(--text-muted)", border: "1px solid var(--border-color)" }}
+                  onClick={() => setCreatingWs(true)}
+                  className="flex items-center justify-center cursor-default"
+                  style={{ color: "var(--text-muted)" }}
                 >
-                  Empty Trash
+                  <IconFolderPlus size={12} />
                 </button>
+              }
+            >
+              <div className="space-y-px">
+                <button
+                  onClick={() => onWorkspaceChange("")}
+                  className="w-full text-left px-3 py-1 rounded-md text-[12px] font-light flex items-center gap-2 cursor-default transition-colors"
+                  style={{
+                    backgroundColor: activeWorkspace === "" ? "var(--bg-hover)" : "transparent",
+                    color: activeWorkspace === "" ? "var(--text-primary)" : "var(--text-secondary)",
+                  }}
+                >
+                  <IconPages size={13} />
+                  <span>All Pages</span>
+                </button>
+
+                {workspaces.map((ws) => (
+                  <div key={ws.id} className="group flex items-center">
+                    <button
+                      onClick={() => onWorkspaceChange(ws.id)}
+                      className="flex-1 text-left px-3 py-1 rounded-md text-[12px] font-light flex items-center gap-2 cursor-default transition-colors"
+                      style={{
+                        backgroundColor: activeWorkspace === ws.id ? "var(--bg-hover)" : "transparent",
+                        color: activeWorkspace === ws.id ? "var(--text-primary)" : "var(--text-secondary)",
+                      }}
+                    >
+                      <IconFolder size={13} />
+                      <span>{ws.name}</span>
+                      <span className="w-1.5 h-1.5 rounded-full ml-auto flex-shrink-0" style={{ backgroundColor: ws.color }} />
+                    </button>
+                    <button
+                      onClick={() => onDeleteWorkspace(ws.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity mr-1 cursor-default flex items-center"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      <IconX size={10} />
+                    </button>
+                  </div>
+                ))}
+
+                <AnimatePresence>
+                  {creatingWs && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex items-center gap-1.5 px-3 py-1">
+                        <span className="flex-shrink-0" style={{ color: "var(--text-muted)" }}><IconFolder size={13} /></span>
+                        <input
+                          ref={wsInputRef}
+                          autoFocus
+                          placeholder="Name..."
+                          className="flex-1 bg-transparent outline-none text-[12px] font-light"
+                          style={{ color: "var(--text-primary)" }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleCreateWs();
+                            if (e.key === "Escape") setCreatingWs(false);
+                          }}
+                          onBlur={() => {
+                            handleCreateWs();
+                            setCreatingWs(false);
+                          }}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            )}
+            </CollapsibleSection>
+          </div>
+        )}
+
+        {/* Favorites */}
+        {favorites.length > 0 && !searchQuery && (
+          <CollapsibleSection title="Favorites" count={favorites.length}>
+            <AnimatePresence mode="popLayout">
+              {favorites.map((note) => (
+                <NoteItem
+                  key={`fav-${note.id}`}
+                  note={note}
+                  isActive={activeId === note.id}
+                  onSelect={() => onSelect(note.id)}
+                  onDelete={() => onDelete(note.id)}
+                  onToggleFavorite={() => onToggleFavorite(note.id)}
+                />
+              ))}
+            </AnimatePresence>
+          </CollapsibleSection>
+        )}
+
+        {/* Pages */}
+        <CollapsibleSection title={searchQuery ? "Results" : "Pages"} count={notes.length}>
+          <AnimatePresence mode="popLayout">
+            {notes.map((note) => (
+              <NoteItem
+                key={note.id}
+                note={note}
+                isActive={activeId === note.id}
+                onSelect={() => onSelect(note.id)}
+                onDelete={() => onDelete(note.id)}
+                onToggleFavorite={() => onToggleFavorite(note.id)}
+              />
+            ))}
+          </AnimatePresence>
+          {notes.length === 0 && searchQuery && (
+            <p className="text-center text-[12px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
+              No results
+            </p>
+          )}
+          {notes.length === 0 && !searchQuery && (
+            <p className="text-center text-[12px] py-6 font-light italic" style={{ color: "var(--text-muted)" }}>
+              No pages yet
+            </p>
+          )}
+        </CollapsibleSection>
+
+        {/* Trash — inline collapsible, only if items exist */}
+        {trashedNotes.length > 0 && (
+          <CollapsibleSection title="Trash" count={trashedNotes.length} defaultOpen={false}>
+            <div className="mb-1 px-1">
+              <button
+                onClick={() => {
+                  if (confirm("Permanently delete all trashed items?")) {
+                    trashedNotes.forEach((n) => onPermanentDelete(n.id));
+                  }
+                }}
+                className="text-[10px] uppercase tracking-[0.08em] px-2 py-1 rounded-md cursor-default transition-colors"
+                style={{ color: "var(--text-muted)", border: "1px solid var(--border-color)" }}
+              >
+                Empty Trash
+              </button>
+            </div>
             <AnimatePresence mode="popLayout">
               {trashedNotes.map((note) => (
                 <motion.div
@@ -470,9 +431,6 @@ export default function Sidebar({
                     <div className="flex-1 min-w-0">
                       <div className="text-[12px] font-light truncate">
                         {note.title || "Untitled"}
-                      </div>
-                      <div className="text-[9px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-                        {formatDate(note.updatedAt)}
                       </div>
                     </div>
                   </button>
@@ -497,15 +455,7 @@ export default function Sidebar({
                 </motion.div>
               ))}
             </AnimatePresence>
-            {trashedNotes.length === 0 && (
-              <div className="flex flex-col items-center py-10 gap-2">
-                <IconTrash size={18} />
-                <p className="text-[12px] font-light italic" style={{ color: "var(--text-muted)" }}>
-                  Trash is empty
-                </p>
-              </div>
-            )}
-          </div>
+          </CollapsibleSection>
         )}
       </nav>
 
@@ -517,7 +467,50 @@ export default function Sidebar({
             {notes.length} {notes.length === 1 ? "page" : "pages"}
           </span>
         </div>
+        {/* Create workspace if none exist yet */}
+        {workspaces.length === 0 && (
+          <button
+            onClick={() => setCreatingWs(true)}
+            className="flex items-center gap-1 cursor-default transition-opacity hover:opacity-80"
+            style={{ color: "var(--text-muted)" }}
+            title="Create workspace"
+          >
+            <IconFolderPlus size={10} />
+            <span className="text-[9px] tracking-[0.1em] uppercase font-medium">Workspace</span>
+          </button>
+        )}
       </div>
+
+      {/* Floating workspace creation when no workspaces */}
+      <AnimatePresence>
+        {creatingWs && workspaces.length === 0 && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden px-3 pb-2"
+          >
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl" style={{ backgroundColor: "var(--bg-tertiary)", border: "1px solid var(--border-color)" }}>
+              <span className="flex-shrink-0" style={{ color: "var(--text-muted)" }}><IconFolder size={13} /></span>
+              <input
+                ref={wsInputRef}
+                autoFocus
+                placeholder="Workspace name..."
+                className="flex-1 bg-transparent outline-none text-[12px] font-light"
+                style={{ color: "var(--text-primary)" }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreateWs();
+                  if (e.key === "Escape") setCreatingWs(false);
+                }}
+                onBlur={() => {
+                  handleCreateWs();
+                  setCreatingWs(false);
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </aside>
   );
 }

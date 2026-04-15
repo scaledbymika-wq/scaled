@@ -9,6 +9,8 @@ import UpdateDialog from "./components/UpdateDialog";
 import CommandPalette from "./components/CommandPalette";
 import FocusTimer from "./components/FocusTimer";
 import HabitTracker from "./components/HabitTracker";
+import BoardView from "./components/BoardView";
+import PlannerView from "./components/PlannerView";
 import { useTheme } from "./lib/theme";
 import {
   getNotes,
@@ -338,8 +340,6 @@ export default function App() {
               onDeleteWorkspace={handleDeleteWorkspace}
               onAssignWorkspace={handleAssignWorkspace}
               onCollapse={() => setSidebarCollapsed(true)}
-              activeView={activeView}
-              onViewChange={setActiveView}
             />
           </motion.div>
         )}
@@ -363,13 +363,28 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* Main Content — switch between editor and habits view */}
+        {/* Main Content — switch between editor and other views */}
         {activeView === "habits" ? (
           <HabitTracker
             notes={getNotes()}
             workspaces={workspaces}
             onSelectNote={(id) => { setActiveId(id); setActiveView("pages"); }}
             onOpenFocusTimer={() => setShowFocusTimer(true)}
+          />
+        ) : activeView === "board" ? (
+          <BoardView
+            notes={getNotes()}
+            workspaces={workspaces}
+            onSelectNote={(id) => { setActiveId(id); setActiveView("pages"); }}
+            onCreateNote={handleNewPage}
+            onRefresh={refresh}
+          />
+        ) : activeView === "planner" ? (
+          <PlannerView
+            notes={getNotes()}
+            workspaces={workspaces}
+            onSelectNote={(id) => { setActiveId(id); setActiveView("pages"); }}
+            onRefresh={refresh}
           />
         ) : (
           <>

@@ -254,6 +254,12 @@ export function IconSidebar(p: IconProps) {
   return <I {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="3" x2="9" y2="21" /></I>;
 }
 
+// — Board & Planner —
+
+export function IconBoard(p: IconProps) {
+  return <I {...p}><rect x="3" y="3" width="5" height="18" rx="1" /><rect x="10" y="3" width="5" height="12" rx="1" /><rect x="17" y="3" width="5" height="15" rx="1" /></I>;
+}
+
 // — Mood Faces —
 
 export function IconMoodAwful(p: IconProps) {

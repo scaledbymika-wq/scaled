@@ -1,3 +1,5 @@
+export type NoteStatus = "" | "todo" | "doing" | "done";
+
 export interface Note {
   id: string;
   title: string;
@@ -8,8 +10,17 @@ export interface Note {
   favorite: boolean;
   trashed: boolean;
   workspace: string;
+  status: NoteStatus;
+  tags: string[]; // tag IDs
+  scheduledAt: string; // ISO date-time string or ""
   createdAt: number;
   updatedAt: number;
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
 }
 
 export interface Workspace {
@@ -20,6 +31,7 @@ export interface Workspace {
 
 const STORAGE_KEY = "scaled-notes";
 const WORKSPACE_KEY = "scaled-workspaces";
+const TAG_KEY = "scaled-tags";
 
 function readAll(): Note[] {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -46,6 +58,9 @@ function migrate(note: Partial<Note> & { id: string }): Note {
     favorite: note.favorite ?? false,
     trashed: note.trashed ?? false,
     workspace: note.workspace ?? "",
+    status: note.status ?? "",
+    tags: note.tags ?? [],
+    scheduledAt: note.scheduledAt ?? "",
     createdAt: note.createdAt ?? Date.now(),
     updatedAt: note.updatedAt ?? Date.now(),
   };
@@ -107,6 +122,9 @@ export function createNote(parentId: string | null = null, workspace = ""): Note
     favorite: false,
     trashed: false,
     workspace,
+    status: "",
+    tags: [],
+    scheduledAt: "",
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -196,6 +214,66 @@ export function deleteWorkspace(id: string) {
 export function getNextWorkspaceColor(): string {
   const existing = getWorkspaces();
   return WORKSPACE_COLORS[existing.length % WORKSPACE_COLORS.length];
+}
+
+// — Tag CRUD —
+
+const TAG_COLORS = [
+  "#8b5cf6", "#ef4444", "#10b981", "#f59e0b", "#3b82f6",
+  "#ec4899", "#06b6d4", "#f97316", "#84cc16", "#6366f1",
+];
+
+export function getTags(): Tag[] {
+  const raw = localStorage.getItem(TAG_KEY);
+  if (!raw) return [];
+  try { return JSON.parse(raw) as Tag[]; }
+  catch { return []; }
+}
+
+function writeTags(tags: Tag[]) {
+  localStorage.setItem(TAG_KEY, JSON.stringify(tags));
+}
+
+export function createTag(name: string): Tag {
+  const existing = getTags();
+  const tag: Tag = {
+    id: crypto.randomUUID(),
+    name,
+    color: TAG_COLORS[existing.length % TAG_COLORS.length],
+  };
+  existing.push(tag);
+  writeTags(existing);
+  return tag;
+}
+
+export function updateTag(id: string, updates: Partial<Omit<Tag, "id">>) {
+  const tags = getTags();
+  const idx = tags.findIndex((t) => t.id === id);
+  if (idx === -1) return;
+  Object.assign(tags[idx], updates);
+  writeTags(tags);
+}
+
+export function deleteTag(id: string) {
+  writeTags(getTags().filter((t) => t.id !== id));
+  // Remove tag from all notes
+  const notes = readAll().map(migrate);
+  notes.forEach((n) => {
+    n.tags = n.tags.filter((t) => t !== id);
+  });
+  writeAll(notes);
+}
+
+export function addTagToNote(noteId: string, tagId: string) {
+  const note = getNote(noteId);
+  if (!note || note.tags.includes(tagId)) return;
+  updateNote(noteId, { tags: [...note.tags, tagId] });
+}
+
+export function removeTagFromNote(noteId: string, tagId: string) {
+  const note = getNote(noteId);
+  if (!note) return;
+  updateNote(noteId, { tags: note.tags.filter((t) => t !== tagId) });
 }
 
 // Convert image file to base64 data URL for local storage
