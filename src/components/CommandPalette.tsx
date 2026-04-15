@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Note, Workspace } from "../lib/storage";
 import {
   IconSearch, IconPage, IconPlus, IconSettings, IconSun, IconMoon,
-  IconFolder, IconTarget, IconPen, IconExpand, IconHabit, IconSidebar,
+  IconFolder, IconTarget, IconExpand, IconHabit, IconSidebar, IconBoard, IconTable,
 } from "./Icons";
 
 interface CommandPaletteProps {
@@ -16,8 +16,9 @@ interface CommandPaletteProps {
   onOpenSettings: () => void;
   onToggleTheme: () => void;
   onToggleFocusTimer: () => void;
-  onOpenDashboard: () => void;
   onOpenHabitTracker: () => void;
+  onOpenBoard: () => void;
+  onOpenPlanner: () => void;
   onToggleZenMode: () => void;
   onToggleSidebar: () => void;
   theme: string;
@@ -42,8 +43,9 @@ export default function CommandPalette({
   onOpenSettings,
   onToggleTheme,
   onToggleFocusTimer,
-  onOpenDashboard,
   onOpenHabitTracker,
+  onOpenBoard,
+  onOpenPlanner,
   onToggleZenMode,
   onToggleSidebar,
   theme,
@@ -70,8 +72,9 @@ export default function CommandPalette({
       { id: "settings", label: "Settings", sublabel: "Cmd+,", icon: <IconSettings size={16} />, action: () => { onOpenSettings(); onClose(); }, category: "Actions" },
       { id: "theme", label: theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode", icon: theme === "dark" ? <IconSun size={16} /> : <IconMoon size={16} />, action: () => { onToggleTheme(); onClose(); }, category: "Actions" },
       { id: "focus", label: "Focus Timer", sublabel: "Pomodoro", icon: <IconTarget size={16} />, action: () => { onToggleFocusTimer(); onClose(); }, category: "Actions" },
-      { id: "dashboard", label: "Dashboard", sublabel: "Stats & Activity", icon: <IconPen size={16} />, action: () => { onOpenDashboard(); onClose(); }, category: "Actions" },
-      { id: "habits", label: "Habit Tracker", sublabel: "Habits & Mood", icon: <IconHabit size={16} />, action: () => { onOpenHabitTracker(); onClose(); }, category: "Actions" },
+      { id: "habits", label: "Habit Tracker", sublabel: "Habits, Mood & Stats", icon: <IconHabit size={16} />, action: () => { onOpenHabitTracker(); onClose(); }, category: "Views" },
+      { id: "board", label: "Board", sublabel: "Kanban Board", icon: <IconBoard size={16} />, action: () => { onOpenBoard(); onClose(); }, category: "Views" },
+      { id: "planner", label: "Planner", sublabel: "Table with Tags & Schedule", icon: <IconTable size={16} />, action: () => { onOpenPlanner(); onClose(); }, category: "Views" },
       { id: "zen", label: "Zen Mode", sublabel: "Distraction-free", icon: <IconExpand size={16} />, action: () => { onToggleZenMode(); onClose(); }, category: "Actions" },
       { id: "sidebar", label: "Toggle Sidebar", sublabel: "Cmd+\\", icon: <IconSidebar size={16} />, action: () => { onToggleSidebar(); onClose(); }, category: "Actions" },
     );
@@ -101,7 +104,7 @@ export default function CommandPalette({
     });
 
     return items;
-  }, [notes, workspaces, theme, onCreatePage, onOpenSettings, onToggleTheme, onToggleFocusTimer, onOpenDashboard, onOpenHabitTracker, onToggleZenMode, onToggleSidebar, onSelectNote, onClose]);
+  }, [notes, workspaces, theme, onCreatePage, onOpenSettings, onToggleTheme, onToggleFocusTimer, onOpenHabitTracker, onOpenBoard, onOpenPlanner, onToggleZenMode, onToggleSidebar, onSelectNote, onClose]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;

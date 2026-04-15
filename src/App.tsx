@@ -469,8 +469,9 @@ export default function App() {
         onOpenSettings={() => setShowSettings(true)}
         onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")}
         onToggleFocusTimer={() => setShowFocusTimer(true)}
-        onOpenDashboard={() => setActiveView("habits")}
         onOpenHabitTracker={() => setActiveView("habits")}
+        onOpenBoard={() => setActiveView("board")}
+        onOpenPlanner={() => setActiveView("planner")}
         onToggleZenMode={() => setZenMode(true)}
         onToggleSidebar={() => setSidebarCollapsed((s) => !s)}
         theme={theme}
