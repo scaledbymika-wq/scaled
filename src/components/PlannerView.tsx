@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import type { Note, NoteStatus, Tag, Workspace } from "../lib/storage";
+import type { Note, NoteStatus, Workspace } from "../lib/storage";
 import { updateNote, getTags } from "../lib/storage";
 import { TagPill } from "./BoardView";
 import { IconPage, IconChevron } from "./Icons";

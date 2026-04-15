@@ -179,7 +179,6 @@ export default function Sidebar({
   onCollapse,
 }: SidebarProps) {
   const [creatingWs, setCreatingWs] = useState(false);
-  const [showTrash, setShowTrash] = useState(false);
   const wsInputRef = useRef<HTMLInputElement>(null);
 
   const handleCreateWs = () => {

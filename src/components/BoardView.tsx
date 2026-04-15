@@ -183,7 +183,7 @@ function BoardCard({
   );
 }
 
-export default function BoardView({ notes, onSelectNote, onCreateNote, onRefresh }: BoardViewProps) {
+export default function BoardView({ notes, onSelectNote, onCreateNote: _onCreateNote, onRefresh }: BoardViewProps) {
   const [dragOverCol, setDragOverCol] = useState<NoteStatus | null>(null);
 
   // Only show notes that have a status set
