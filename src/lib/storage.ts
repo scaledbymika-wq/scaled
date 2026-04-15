@@ -276,6 +276,243 @@ export function removeTagFromNote(noteId: string, tagId: string) {
   updateNote(noteId, { tags: note.tags.filter((t) => t !== tagId) });
 }
 
+// — Board System (Notion-style) —
+
+export interface Board {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  columnOrder: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface BoardColumn {
+  id: string;
+  boardId: string;
+  name: string;
+  color: string;
+  cardOrder: string[];
+}
+
+export interface BoardCard {
+  id: string;
+  boardId: string;
+  columnId: string;
+  title: string;
+  description: string;
+  color: string;
+  tags: string[];
+  scheduledAt: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+const BOARDS_KEY = "scaled-boards";
+const COLUMNS_KEY = "scaled-board-columns";
+const CARDS_KEY = "scaled-board-cards";
+
+const COLUMN_COLORS = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
+
+function readBoards(): Board[] {
+  try { return JSON.parse(localStorage.getItem(BOARDS_KEY) || "[]"); } catch { return []; }
+}
+function writeBoards(b: Board[]) { localStorage.setItem(BOARDS_KEY, JSON.stringify(b)); }
+function readColumns(): BoardColumn[] {
+  try { return JSON.parse(localStorage.getItem(COLUMNS_KEY) || "[]"); } catch { return []; }
+}
+function writeColumns(c: BoardColumn[]) { localStorage.setItem(COLUMNS_KEY, JSON.stringify(c)); }
+function readCards(): BoardCard[] {
+  try { return JSON.parse(localStorage.getItem(CARDS_KEY) || "[]"); } catch { return []; }
+}
+function writeCards(c: BoardCard[]) { localStorage.setItem(CARDS_KEY, JSON.stringify(c)); }
+
+// Board CRUD
+export function getBoards(): Board[] {
+  return readBoards().sort((a, b) => b.updatedAt - a.updatedAt);
+}
+export function getBoard(id: string): Board | undefined {
+  return readBoards().find((b) => b.id === id);
+}
+export function createBoard(name: string): Board {
+  const boards = readBoards();
+  const board: Board = {
+    id: crypto.randomUUID(),
+    name,
+    icon: "",
+    color: WORKSPACE_COLORS[boards.length % WORKSPACE_COLORS.length],
+    columnOrder: [],
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+  boards.push(board);
+  writeBoards(boards);
+  // Create default columns
+  const defaults = [
+    { name: "To Do", color: "#ef4444" },
+    { name: "Doing", color: "#f59e0b" },
+    { name: "Done", color: "#10b981" },
+  ];
+  const cols = readColumns();
+  defaults.forEach((d) => {
+    const col: BoardColumn = { id: crypto.randomUUID(), boardId: board.id, name: d.name, color: d.color, cardOrder: [] };
+    cols.push(col);
+    board.columnOrder.push(col.id);
+  });
+  writeColumns(cols);
+  // Update board with column order
+  const idx = boards.findIndex((b) => b.id === board.id);
+  boards[idx] = board;
+  writeBoards(boards);
+  return board;
+}
+export function updateBoard(id: string, updates: Partial<Omit<Board, "id" | "createdAt">>) {
+  const boards = readBoards();
+  const idx = boards.findIndex((b) => b.id === id);
+  if (idx === -1) return;
+  Object.assign(boards[idx], updates, { updatedAt: Date.now() });
+  writeBoards(boards);
+}
+export function deleteBoard(id: string) {
+  writeBoards(readBoards().filter((b) => b.id !== id));
+  writeCards(readCards().filter((c) => c.boardId !== id));
+  writeColumns(readColumns().filter((c) => c.boardId !== id));
+}
+
+// Column CRUD
+export function getColumnsForBoard(boardId: string): BoardColumn[] {
+  const board = getBoard(boardId);
+  if (!board) return [];
+  const cols = readColumns().filter((c) => c.boardId === boardId);
+  return board.columnOrder.map((id) => cols.find((c) => c.id === id)).filter(Boolean) as BoardColumn[];
+}
+export function createColumn(boardId: string, name: string): BoardColumn {
+  const cols = readColumns();
+  const boardCols = cols.filter((c) => c.boardId === boardId);
+  const col: BoardColumn = {
+    id: crypto.randomUUID(),
+    boardId,
+    name,
+    color: COLUMN_COLORS[boardCols.length % COLUMN_COLORS.length],
+    cardOrder: [],
+  };
+  cols.push(col);
+  writeColumns(cols);
+  // Add to board's columnOrder
+  const boards = readBoards();
+  const board = boards.find((b) => b.id === boardId);
+  if (board) {
+    board.columnOrder.push(col.id);
+    board.updatedAt = Date.now();
+    writeBoards(boards);
+  }
+  return col;
+}
+export function updateColumn(id: string, updates: Partial<Omit<BoardColumn, "id" | "boardId">>) {
+  const cols = readColumns();
+  const idx = cols.findIndex((c) => c.id === id);
+  if (idx === -1) return;
+  Object.assign(cols[idx], updates);
+  writeColumns(cols);
+}
+export function deleteColumn(id: string) {
+  const col = readColumns().find((c) => c.id === id);
+  if (!col) return;
+  writeColumns(readColumns().filter((c) => c.id !== id));
+  writeCards(readCards().filter((c) => c.columnId !== id));
+  // Remove from board's columnOrder
+  const boards = readBoards();
+  const board = boards.find((b) => b.id === col.boardId);
+  if (board) {
+    board.columnOrder = board.columnOrder.filter((cid) => cid !== id);
+    board.updatedAt = Date.now();
+    writeBoards(boards);
+  }
+}
+export function reorderColumns(boardId: string, newOrder: string[]) {
+  updateBoard(boardId, { columnOrder: newOrder });
+}
+
+// Card CRUD
+export function getCardsForColumn(columnId: string): BoardCard[] {
+  const col = readColumns().find((c) => c.id === columnId);
+  if (!col) return [];
+  const cards = readCards().filter((c) => c.columnId === columnId);
+  return col.cardOrder.map((id) => cards.find((c) => c.id === id)).filter(Boolean) as BoardCard[];
+}
+export function getCardsForBoard(boardId: string): BoardCard[] {
+  return readCards().filter((c) => c.boardId === boardId);
+}
+export function getAllCards(): BoardCard[] {
+  return readCards().sort((a, b) => b.updatedAt - a.updatedAt);
+}
+export function createCard(boardId: string, columnId: string, title: string): BoardCard {
+  const card: BoardCard = {
+    id: crypto.randomUUID(),
+    boardId,
+    columnId,
+    title,
+    description: "",
+    color: "",
+    tags: [],
+    scheduledAt: "",
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+  const cards = readCards();
+  cards.push(card);
+  writeCards(cards);
+  // Add to column's cardOrder
+  const cols = readColumns();
+  const col = cols.find((c) => c.id === columnId);
+  if (col) {
+    col.cardOrder.push(card.id);
+    writeColumns(cols);
+  }
+  return card;
+}
+export function updateCard(id: string, updates: Partial<Omit<BoardCard, "id" | "boardId" | "createdAt">>) {
+  const cards = readCards();
+  const idx = cards.findIndex((c) => c.id === id);
+  if (idx === -1) return;
+  Object.assign(cards[idx], updates, { updatedAt: Date.now() });
+  writeCards(cards);
+}
+export function deleteCard(id: string) {
+  const card = readCards().find((c) => c.id === id);
+  if (!card) return;
+  writeCards(readCards().filter((c) => c.id !== id));
+  const cols = readColumns();
+  const col = cols.find((c) => c.id === card.columnId);
+  if (col) {
+    col.cardOrder = col.cardOrder.filter((cid) => cid !== id);
+    writeColumns(cols);
+  }
+}
+export function moveCard(cardId: string, toColumnId: string, toIndex: number) {
+  const cards = readCards();
+  const card = cards.find((c) => c.id === cardId);
+  if (!card) return;
+  const cols = readColumns();
+  // Remove from source column
+  const srcCol = cols.find((c) => c.id === card.columnId);
+  if (srcCol) {
+    srcCol.cardOrder = srcCol.cardOrder.filter((id) => id !== cardId);
+  }
+  // Insert into target column
+  const tgtCol = cols.find((c) => c.id === toColumnId);
+  if (tgtCol) {
+    const idx = Math.min(toIndex, tgtCol.cardOrder.length);
+    tgtCol.cardOrder.splice(idx, 0, cardId);
+  }
+  // Update card's columnId
+  card.columnId = toColumnId;
+  card.updatedAt = Date.now();
+  writeColumns(cols);
+  writeCards(cards);
+}
+
 // Convert image file to base64 data URL for local storage
 export function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

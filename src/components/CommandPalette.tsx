@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Note, Workspace } from "../lib/storage";
+import type { Note, Workspace, Board } from "../lib/storage";
 import {
   IconSearch, IconPage, IconPlus, IconSettings, IconSun, IconMoon,
   IconFolder, IconTarget, IconExpand, IconHabit, IconSidebar, IconBoard, IconTable,
@@ -22,6 +22,8 @@ interface CommandPaletteProps {
   onToggleZenMode: () => void;
   onToggleSidebar: () => void;
   theme: string;
+  boards: Board[];
+  onSelectBoard: (id: string) => void;
 }
 
 interface CommandItem {
@@ -48,6 +50,8 @@ export default function CommandPalette({
   onOpenPlanner,
   onToggleZenMode,
   onToggleSidebar,
+  boards,
+  onSelectBoard,
   theme,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
@@ -92,6 +96,18 @@ export default function CommandPalette({
       });
     });
 
+    // Boards
+    boards.forEach((board) => {
+      items.push({
+        id: `board-${board.id}`,
+        label: board.name,
+        sublabel: "Board",
+        icon: <span className="text-sm">{board.icon || "📋"}</span>,
+        action: () => { onSelectBoard(board.id); onClose(); },
+        category: "Boards",
+      });
+    });
+
     // Workspaces
     workspaces.forEach((ws) => {
       items.push({
@@ -104,7 +120,7 @@ export default function CommandPalette({
     });
 
     return items;
-  }, [notes, workspaces, theme, onCreatePage, onOpenSettings, onToggleTheme, onToggleFocusTimer, onOpenHabitTracker, onOpenBoard, onOpenPlanner, onToggleZenMode, onToggleSidebar, onSelectNote, onClose]);
+  }, [notes, workspaces, boards, theme, onCreatePage, onOpenSettings, onToggleTheme, onToggleFocusTimer, onOpenHabitTracker, onOpenBoard, onOpenPlanner, onToggleZenMode, onToggleSidebar, onSelectNote, onSelectBoard, onClose]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;

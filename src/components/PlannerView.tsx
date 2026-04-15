@@ -1,104 +1,72 @@
 import { useState, useMemo } from "react";
-import type { Note, NoteStatus, Workspace } from "../lib/storage";
-import { updateNote, getTags } from "../lib/storage";
-import { TagPill } from "./BoardView";
-import { IconPage, IconChevron } from "./Icons";
+import type { Board, BoardCard, BoardColumn, Tag } from "../lib/storage";
+import { getBoards, getColumnsForBoard, getAllCards, getTags, updateCard, moveCard } from "../lib/storage";
+import { IconChevron } from "./Icons";
 
-interface PlannerViewProps {
-  notes: Note[];
-  workspaces: Workspace[];
-  onSelectNote: (id: string) => void;
-  onRefresh: () => void;
-}
-
-const STATUS_OPTIONS: { key: NoteStatus; label: string; color: string }[] = [
-  { key: "", label: "—", color: "var(--text-muted)" },
-  { key: "todo", label: "To Do", color: "#ef4444" },
-  { key: "doing", label: "Doing", color: "#f59e0b" },
-  { key: "done", label: "Done", color: "#10b981" },
-];
-
-function StatusBadge({ status, onChange }: { status: NoteStatus; onChange: (s: NoteStatus) => void }) {
-  const [open, setOpen] = useState(false);
-  const current = STATUS_OPTIONS.find((s) => s.key === status) || STATUS_OPTIONS[0];
-
+function TagPill({ tag }: { tag: Tag }) {
   return (
-    <div className="relative">
-      <button
-        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
-        className="px-2 py-0.5 rounded-lg text-[10px] font-medium cursor-default transition-colors"
-        style={{
-          backgroundColor: status ? current.color + "18" : "var(--bg-tertiary)",
-          color: current.color,
-          border: `1px solid ${status ? current.color + "30" : "var(--border-color)"}`,
-        }}
-      >
-        {current.label}
-      </button>
-      {open && (
-        <div
-          className="absolute top-full left-0 mt-1 rounded-xl overflow-hidden z-50 w-[100px]"
-          style={{
-            backgroundColor: "var(--card-bg)",
-            border: "1px solid var(--border-color)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
-          }}
-        >
-          {STATUS_OPTIONS.map((opt) => (
-            <button
-              key={opt.key}
-              onClick={(e) => { e.stopPropagation(); onChange(opt.key); setOpen(false); }}
-              className="w-full text-left px-3 py-1.5 text-[11px] cursor-default transition-colors"
-              style={{
-                color: opt.color,
-                backgroundColor: status === opt.key ? "var(--bg-hover)" : "transparent",
-              }}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    <span
+      className="px-1.5 py-0.5 rounded-full text-[9px] font-medium"
+      style={{ backgroundColor: tag.color + "20", color: tag.color }}
+    >
+      {tag.name}
+    </span>
   );
 }
 
-type SortKey = "title" | "status" | "scheduledAt" | "updatedAt";
+type SortKey = "title" | "board" | "column" | "scheduledAt" | "updatedAt";
 
-export default function PlannerView({ notes, workspaces, onSelectNote, onRefresh }: PlannerViewProps) {
+export default function PlannerView({ onOpenBoard }: { onOpenBoard: (id: string) => void }) {
   const [sortBy, setSortBy] = useState<SortKey>("updatedAt");
   const [sortAsc, setSortAsc] = useState(false);
+  const [filterBoard, setFilterBoard] = useState<string | null>(null);
   const [filterTag, setFilterTag] = useState<string | null>(null);
 
+  const boards = getBoards();
   const tags = getTags();
-  const allNotes = useMemo(() => notes.filter((n) => !n.trashed), [notes]);
+  const allCards = getAllCards();
+
+  // Build lookup maps
+  const boardMap = useMemo(() => {
+    const m = new Map<string, Board>();
+    boards.forEach((b) => m.set(b.id, b));
+    return m;
+  }, [boards]);
+
+  const columnMap = useMemo(() => {
+    const m = new Map<string, BoardColumn>();
+    boards.forEach((b) => {
+      getColumnsForBoard(b.id).forEach((c) => m.set(c.id, c));
+    });
+    return m;
+  }, [boards]);
 
   const filtered = useMemo(() => {
-    let list = allNotes;
-    if (filterTag) list = list.filter((n) => n.tags.includes(filterTag));
+    let list = allCards;
+    if (filterBoard) list = list.filter((c) => c.boardId === filterBoard);
+    if (filterTag) list = list.filter((c) => c.tags.includes(filterTag));
     return list.sort((a, b) => {
       let cmp = 0;
-      if (sortBy === "title") cmp = (a.title || "Untitled").localeCompare(b.title || "Untitled");
-      else if (sortBy === "status") cmp = (a.status || "").localeCompare(b.status || "");
+      if (sortBy === "title") cmp = (a.title || "").localeCompare(b.title || "");
+      else if (sortBy === "board") cmp = (boardMap.get(a.boardId)?.name || "").localeCompare(boardMap.get(b.boardId)?.name || "");
+      else if (sortBy === "column") cmp = (columnMap.get(a.columnId)?.name || "").localeCompare(columnMap.get(b.columnId)?.name || "");
       else if (sortBy === "scheduledAt") cmp = (a.scheduledAt || "").localeCompare(b.scheduledAt || "");
       else cmp = a.updatedAt - b.updatedAt;
       return sortAsc ? cmp : -cmp;
     });
-  }, [allNotes, sortBy, sortAsc, filterTag]);
+  }, [allCards, sortBy, sortAsc, filterBoard, filterTag, boardMap, columnMap]);
 
   const toggleSort = (key: SortKey) => {
     if (sortBy === key) setSortAsc(!sortAsc);
     else { setSortBy(key); setSortAsc(true); }
   };
 
-  const handleStatusChange = (noteId: string, status: NoteStatus) => {
-    updateNote(noteId, { status });
-    onRefresh();
+  const handleScheduleChange = (cardId: string, value: string) => {
+    updateCard(cardId, { scheduledAt: value });
   };
 
-  const handleScheduleChange = (noteId: string, value: string) => {
-    updateNote(noteId, { scheduledAt: value });
-    onRefresh();
+  const handleColumnChange = (card: BoardCard, newColId: string) => {
+    moveCard(card.id, newColId, 999);
   };
 
   const SortHeader = ({ label, sortKey }: { label: string; sortKey: SortKey }) => (
@@ -118,132 +86,179 @@ export default function PlannerView({ notes, workspaces, onSelectNote, onRefresh
     <div className="h-full overflow-y-auto">
       <div className="h-[52px] flex-shrink-0 w-full" data-tauri-drag-region="true" />
 
-      <div className="max-w-[900px] mx-auto px-8 pb-20">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="font-serif italic text-2xl font-light" style={{ color: "var(--text-primary)" }}>
-              Planner
-            </h1>
-            <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-              All pages as a table with tags and schedule
-            </p>
-          </div>
+      <div className="max-w-[960px] mx-auto px-8 pb-20">
+        <div className="mb-6">
+          <h1 className="font-serif italic text-[2rem] font-light" style={{ color: "var(--text-primary)" }}>
+            Planner
+          </h1>
+          <p className="text-[12px] font-light mt-1" style={{ color: "var(--text-muted)" }}>
+            All your board cards in one table
+          </p>
         </div>
 
-        {/* Tag Filter */}
-        {tags.length > 0 && (
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
-            <span className="text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--text-muted)" }}>Filter:</span>
-            <button
-              onClick={() => setFilterTag(null)}
-              className="px-2 py-0.5 rounded-full text-[10px] cursor-default transition-colors"
-              style={{
-                backgroundColor: !filterTag ? "var(--bg-hover)" : "transparent",
-                color: !filterTag ? "var(--text-primary)" : "var(--text-muted)",
-                border: "1px solid var(--border-color)",
-              }}
-            >
-              All
-            </button>
-            {tags.map((tag) => (
+        {/* Filters */}
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
+          {/* Board Filter */}
+          {boards.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--text-muted)" }}>Board:</span>
               <button
-                key={tag.id}
-                onClick={() => setFilterTag(filterTag === tag.id ? null : tag.id)}
-                className="px-2 py-0.5 rounded-full text-[10px] font-medium cursor-default transition-colors"
+                onClick={() => setFilterBoard(null)}
+                className="px-2 py-0.5 rounded-full text-[10px] cursor-default transition-colors"
                 style={{
-                  backgroundColor: filterTag === tag.id ? tag.color + "20" : "transparent",
-                  color: filterTag === tag.id ? tag.color : "var(--text-muted)",
-                  border: `1px solid ${filterTag === tag.id ? tag.color + "40" : "var(--border-color)"}`,
+                  backgroundColor: !filterBoard ? "var(--bg-hover)" : "transparent",
+                  color: !filterBoard ? "var(--text-primary)" : "var(--text-muted)",
+                  border: "1px solid var(--border-color)",
                 }}
               >
-                {tag.name}
+                All
               </button>
-            ))}
-          </div>
-        )}
+              {boards.map((board) => (
+                <button
+                  key={board.id}
+                  onClick={() => setFilterBoard(filterBoard === board.id ? null : board.id)}
+                  className="px-2 py-0.5 rounded-full text-[10px] font-medium cursor-default transition-colors"
+                  style={{
+                    backgroundColor: filterBoard === board.id ? board.color + "20" : "transparent",
+                    color: filterBoard === board.id ? board.color : "var(--text-muted)",
+                    border: `1px solid ${filterBoard === board.id ? board.color + "40" : "var(--border-color)"}`,
+                  }}
+                >
+                  {board.name}
+                </button>
+              ))}
+            </div>
+          )}
 
-        {/* Table */}
-        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-color)" }}>
-          {/* Header Row */}
-          <div
-            className="grid gap-3 px-4 py-2.5"
-            style={{
-              gridTemplateColumns: "1fr 140px 100px 140px",
-              backgroundColor: "var(--bg-tertiary)",
-              borderBottom: "1px solid var(--border-color)",
-            }}
-          >
-            <SortHeader label="Title" sortKey="title" />
-            <span className="text-[10px] uppercase tracking-[0.1em] font-medium" style={{ color: "var(--text-muted)" }}>Tags</span>
-            <SortHeader label="Status" sortKey="status" />
-            <SortHeader label="Scheduled" sortKey="scheduledAt" />
-          </div>
-
-          {/* Rows */}
-          {filtered.map((note, i) => {
-            const noteTags = tags.filter((t) => note.tags.includes(t.id));
-            const ws = workspaces.find((w) => w.id === note.workspace);
-            return (
-              <div
-                key={note.id}
-                className="grid gap-3 px-4 py-2.5 items-center transition-colors cursor-default"
-                style={{
-                  gridTemplateColumns: "1fr 140px 100px 140px",
-                  backgroundColor: "var(--bg-secondary)",
-                  borderBottom: i < filtered.length - 1 ? "1px solid var(--border-color)" : "none",
-                }}
-                onClick={() => onSelectNote(note.id)}
-              >
-                {/* Title */}
-                <div className="flex items-center gap-2 min-w-0">
-                  {note.icon ? (
-                    <span className="text-[13px] flex-shrink-0">{note.icon}</span>
-                  ) : (
-                    <span style={{ color: "var(--text-muted)" }} className="flex-shrink-0"><IconPage size={13} /></span>
-                  )}
-                  <span className="text-[12px] font-light truncate" style={{ color: "var(--text-primary)" }}>
-                    {note.title || "Untitled"}
-                  </span>
-                  {ws && (
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: ws.color }} />
-                  )}
-                </div>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1">
-                  {noteTags.map((tag) => (
-                    <TagPill key={tag.id} tag={tag} />
-                  ))}
-                </div>
-
-                {/* Status */}
-                <div onClick={(e) => e.stopPropagation()}>
-                  <StatusBadge status={note.status} onChange={(s) => handleStatusChange(note.id, s)} />
-                </div>
-
-                {/* Schedule */}
-                <div onClick={(e) => e.stopPropagation()}>
-                  <input
-                    type="datetime-local"
-                    value={note.scheduledAt}
-                    onChange={(e) => handleScheduleChange(note.id, e.target.value)}
-                    className="bg-transparent outline-none text-[11px] tabular-nums w-full cursor-default"
-                    style={{ color: note.scheduledAt ? "var(--text-primary)" : "var(--text-muted)" }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-
-          {filtered.length === 0 && (
-            <div className="px-4 py-10 text-center">
-              <p className="text-[12px] font-light italic" style={{ color: "var(--text-muted)" }}>
-                {filterTag ? "No pages with this tag" : "No pages yet"}
-              </p>
+          {/* Tag Filter */}
+          {tags.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--text-muted)" }}>Tag:</span>
+              {tags.map((tag) => (
+                <button
+                  key={tag.id}
+                  onClick={() => setFilterTag(filterTag === tag.id ? null : tag.id)}
+                  className="px-2 py-0.5 rounded-full text-[10px] font-medium cursor-default transition-colors"
+                  style={{
+                    backgroundColor: filterTag === tag.id ? tag.color + "20" : "transparent",
+                    color: filterTag === tag.id ? tag.color : "var(--text-muted)",
+                    border: `1px solid ${filterTag === tag.id ? tag.color + "40" : "var(--border-color)"}`,
+                  }}
+                >
+                  {tag.name}
+                </button>
+              ))}
             </div>
           )}
         </div>
+
+        {/* Table */}
+        {filtered.length > 0 || boards.length > 0 ? (
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border-color)" }}>
+            {/* Header */}
+            <div
+              className="grid gap-3 px-4 py-2.5"
+              style={{
+                gridTemplateColumns: "1fr 120px 120px 100px 150px",
+                backgroundColor: "var(--bg-tertiary)",
+                borderBottom: "1px solid var(--border-color)",
+              }}
+            >
+              <SortHeader label="Title" sortKey="title" />
+              <SortHeader label="Board" sortKey="board" />
+              <SortHeader label="Column" sortKey="column" />
+              <span className="text-[10px] uppercase tracking-[0.1em] font-medium" style={{ color: "var(--text-muted)" }}>Tags</span>
+              <SortHeader label="Scheduled" sortKey="scheduledAt" />
+            </div>
+
+            {/* Rows */}
+            {filtered.map((card, i) => {
+              const board = boardMap.get(card.boardId);
+              const column = columnMap.get(card.columnId);
+              const cardTags = tags.filter((t) => card.tags.includes(t.id));
+              const boardColumns = board ? getColumnsForBoard(board.id) : [];
+
+              return (
+                <div
+                  key={card.id}
+                  className="grid gap-3 px-4 py-2.5 items-center transition-colors"
+                  style={{
+                    gridTemplateColumns: "1fr 120px 120px 100px 150px",
+                    backgroundColor: "var(--bg-secondary)",
+                    borderBottom: i < filtered.length - 1 ? "1px solid var(--border-color)" : "none",
+                  }}
+                >
+                  {/* Title */}
+                  <span
+                    className="text-[12px] font-light truncate cursor-default"
+                    style={{ color: card.color || "var(--text-primary)", borderLeft: card.color ? `2px solid ${card.color}` : undefined, paddingLeft: card.color ? "8px" : undefined }}
+                    onClick={() => board && onOpenBoard(board.id)}
+                  >
+                    {card.title || "Untitled"}
+                  </span>
+
+                  {/* Board */}
+                  {board && (
+                    <span
+                      className="text-[10px] font-medium px-2 py-0.5 rounded-full truncate cursor-default"
+                      style={{ backgroundColor: board.color + "15", color: board.color }}
+                      onClick={() => onOpenBoard(board.id)}
+                    >
+                      {board.name}
+                    </span>
+                  )}
+
+                  {/* Column — dropdown */}
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <select
+                      value={card.columnId}
+                      onChange={(e) => handleColumnChange(card, e.target.value)}
+                      className="bg-transparent outline-none text-[10px] rounded-lg px-1 py-0.5 cursor-default w-full"
+                      style={{
+                        color: column?.color || "var(--text-muted)",
+                        border: "1px solid var(--border-color)",
+                      }}
+                    >
+                      {boardColumns.map((col) => (
+                        <option key={col.id} value={col.id}>{col.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1">
+                    {cardTags.map((tag) => <TagPill key={tag.id} tag={tag} />)}
+                  </div>
+
+                  {/* Schedule */}
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="datetime-local"
+                      value={card.scheduledAt}
+                      onChange={(e) => handleScheduleChange(card.id, e.target.value)}
+                      className="bg-transparent outline-none text-[10px] tabular-nums w-full cursor-default"
+                      style={{ color: card.scheduledAt ? "var(--text-primary)" : "var(--text-muted)" }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+
+            {filtered.length === 0 && (
+              <div className="px-4 py-10 text-center">
+                <p className="text-[12px] font-light italic" style={{ color: "var(--text-muted)" }}>
+                  {filterBoard || filterTag ? "No cards match your filters" : "No cards yet — create some on your boards"}
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-[13px] font-light italic" style={{ color: "var(--text-muted)" }}>
+              Create a board first to see cards here
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

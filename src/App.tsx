@@ -9,7 +9,8 @@ import UpdateDialog from "./components/UpdateDialog";
 import CommandPalette from "./components/CommandPalette";
 import FocusTimer from "./components/FocusTimer";
 import HabitTracker from "./components/HabitTracker";
-import BoardView from "./components/BoardView";
+import BoardListView from "./components/BoardListView";
+import BoardDetailView from "./components/BoardDetailView";
 import PlannerView from "./components/PlannerView";
 import { useTheme } from "./lib/theme";
 import {
@@ -27,8 +28,11 @@ import {
   getWorkspaces,
   createWorkspace,
   deleteWorkspace,
+  getBoards,
+  getBoard,
   type Note,
   type Workspace,
+  type Board,
 } from "./lib/storage";
 import {
   IconTarget, IconMenu, IconExpand, IconShrink,
@@ -48,7 +52,8 @@ export default function App() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [zenMode, setZenMode] = useState(false);
-  const [activeView, setActiveView] = useState("pages"); // "pages" | "trash" | "habits"
+  const [activeView, setActiveView] = useState("pages"); // "pages" | "habits" | "boards" | "board:{id}" | "planner"
+  const [boards, setBoards] = useState<Board[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const { settings, theme, setTheme } = useTheme();
 
@@ -64,6 +69,7 @@ export default function App() {
     setFavorites(getFavorites());
     setTrashedNotes(getTrashed());
     setWorkspaces(getWorkspaces());
+    setBoards(getBoards());
   }, [searchQuery, activeWorkspace]);
 
   useEffect(() => {
@@ -340,6 +346,10 @@ export default function App() {
               onDeleteWorkspace={handleDeleteWorkspace}
               onAssignWorkspace={handleAssignWorkspace}
               onCollapse={() => setSidebarCollapsed(true)}
+              boards={boards}
+              activeBoardId={activeView.startsWith("board:") ? activeView.slice(6) : null}
+              onSelectBoard={(id) => setActiveView(`board:${id}`)}
+              onOpenBoardList={() => setActiveView("boards")}
             />
           </motion.div>
         )}
@@ -371,20 +381,29 @@ export default function App() {
             onSelectNote={(id) => { setActiveId(id); setActiveView("pages"); }}
             onOpenFocusTimer={() => setShowFocusTimer(true)}
           />
-        ) : activeView === "board" ? (
-          <BoardView
-            notes={getNotes()}
-            workspaces={workspaces}
-            onSelectNote={(id) => { setActiveId(id); setActiveView("pages"); }}
-            onCreateNote={handleNewPage}
+        ) : activeView === "boards" ? (
+          <BoardListView
+            boards={boards}
+            onSelectBoard={(id) => setActiveView(`board:${id}`)}
             onRefresh={refresh}
           />
+        ) : activeView.startsWith("board:") ? (
+          (() => {
+            const boardId = activeView.slice(6);
+            const board = getBoard(boardId);
+            return board ? (
+              <BoardDetailView
+                board={board}
+                onBack={() => setActiveView("boards")}
+                onRefresh={refresh}
+              />
+            ) : (
+              <BoardListView boards={boards} onSelectBoard={(id) => setActiveView(`board:${id}`)} onRefresh={refresh} />
+            );
+          })()
         ) : activeView === "planner" ? (
           <PlannerView
-            notes={getNotes()}
-            workspaces={workspaces}
-            onSelectNote={(id) => { setActiveId(id); setActiveView("pages"); }}
-            onRefresh={refresh}
+            onOpenBoard={(id) => setActiveView(`board:${id}`)}
           />
         ) : (
           <>
@@ -470,8 +489,10 @@ export default function App() {
         onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")}
         onToggleFocusTimer={() => setShowFocusTimer(true)}
         onOpenHabitTracker={() => setActiveView("habits")}
-        onOpenBoard={() => setActiveView("board")}
+        onOpenBoard={() => setActiveView("boards")}
         onOpenPlanner={() => setActiveView("planner")}
+        boards={boards}
+        onSelectBoard={(id) => setActiveView(`board:${id}`)}
         onToggleZenMode={() => setZenMode(true)}
         onToggleSidebar={() => setSidebarCollapsed((s) => !s)}
         theme={theme}

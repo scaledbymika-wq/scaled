@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef } from "react";
-import type { Note, Workspace } from "../lib/storage";
+import type { Note, Workspace, Board } from "../lib/storage";
 import {
   IconSearch, IconPlus, IconChevron, IconSettings,
   IconStar, IconStarFilled, IconTrash, IconPage, IconPages,
@@ -28,6 +28,10 @@ interface SidebarProps {
   onDeleteWorkspace: (id: string) => void;
   onAssignWorkspace: (noteId: string, workspaceId: string) => void;
   onCollapse: () => void;
+  boards: Board[];
+  activeBoardId: string | null;
+  onSelectBoard: (id: string) => void;
+  onOpenBoardList: () => void;
 }
 
 function formatDate(ts: number) {
@@ -177,6 +181,10 @@ export default function Sidebar({
   onCreateWorkspace,
   onDeleteWorkspace,
   onCollapse,
+  boards,
+  activeBoardId,
+  onSelectBoard,
+  onOpenBoardList,
 }: SidebarProps) {
   const [creatingWs, setCreatingWs] = useState(false);
   const wsInputRef = useRef<HTMLInputElement>(null);
@@ -349,6 +357,35 @@ export default function Sidebar({
               </div>
             </CollapsibleSection>
           </div>
+        )}
+
+        {/* Boards */}
+        {boards.length > 0 && (
+          <CollapsibleSection title="Boards" count={boards.length}>
+            {boards.map((board) => (
+              <button
+                key={board.id}
+                onClick={() => onSelectBoard(board.id)}
+                className="w-full text-left px-3 py-1.5 rounded-xl mb-px cursor-default transition-all duration-100 flex items-center gap-2"
+                style={{
+                  backgroundColor: activeBoardId === board.id ? "var(--bg-hover)" : "transparent",
+                  color: activeBoardId === board.id ? "var(--text-primary)" : "var(--text-secondary)",
+                }}
+              >
+                <span className="text-[12px] flex-shrink-0">{board.icon || "📋"}</span>
+                <span className="text-[12px] font-light truncate flex-1">{board.name}</span>
+                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: board.color }} />
+              </button>
+            ))}
+            <button
+              onClick={onOpenBoardList}
+              className="w-full text-left px-3 py-1 rounded-xl cursor-default flex items-center gap-2 transition-colors"
+              style={{ color: "var(--text-muted)" }}
+            >
+              <IconPlus size={10} />
+              <span className="text-[11px] font-light">New Board</span>
+            </button>
+          </CollapsibleSection>
         )}
 
         {/* Favorites */}
