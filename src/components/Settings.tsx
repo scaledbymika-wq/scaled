@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { getVersion } from "@tauri-apps/api/app";
 import { useTheme } from "../lib/theme";
 import { IconX, IconSun, IconMoon, IconPalette } from "./Icons";
 
@@ -8,6 +10,8 @@ interface SettingsProps {
 
 export default function Settings({ onClose }: SettingsProps) {
   const { settings, updateSettings } = useTheme();
+  const [appVersion, setAppVersion] = useState("...");
+  useEffect(() => { getVersion().then(setAppVersion).catch(() => setAppVersion("0.5.1")); }, []);
 
   return (
     <motion.div
@@ -131,7 +135,7 @@ export default function Settings({ onClose }: SettingsProps) {
           {/* About */}
           <Section title="ABOUT">
             <div className="text-[13px] space-y-2" style={{ color: "var(--text-muted)" }}>
-              <p><span style={{ color: "var(--text-primary)" }} className="font-serif italic">Scaled.</span> <span className="text-[11px] font-mono">v0.5.0</span></p>
+              <p><span style={{ color: "var(--text-primary)" }} className="font-serif italic">Scaled.</span> <span className="text-[11px] font-mono">v{appVersion}</span></p>
               <p>Built by ScaledByMika</p>
               <p className="font-serif italic text-[14px]" style={{ color: "var(--text-secondary)" }}>
                 "Your space to think, write, and build."
