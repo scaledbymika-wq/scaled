@@ -6,7 +6,7 @@ import {
   createColumn, updateColumn, deleteColumn,
   createCard, moveCard, updateBoard,
 } from "../lib/storage";
-import { IconPlus, IconChevron, IconX } from "./Icons";
+import { IconPlus, IconChevron, IconX, IconBoard } from "./Icons";
 import CardModal from "./CardModal";
 
 interface BoardDetailViewProps {
@@ -18,8 +18,8 @@ interface BoardDetailViewProps {
 function TagPill({ tag }: { tag: Tag }) {
   return (
     <span
-      className="px-1.5 py-0.5 rounded-full text-[9px] font-medium"
-      style={{ backgroundColor: tag.color + "20", color: tag.color }}
+      className="px-1.5 py-0.5 rounded text-[9px] font-medium tracking-wide"
+      style={{ backgroundColor: tag.color + "18", color: tag.color }}
     >
       {tag.name}
     </span>
@@ -44,26 +44,27 @@ function CardItem({
       draggable
       onDragStart={onDragStart}
       onClick={onOpen}
-      className="rounded-xl p-3 cursor-default transition-all duration-100 group"
+      className="rounded-xl p-3 cursor-default transition-all duration-150 hover:translate-y-[-1px]"
       style={{
-        backgroundColor: "var(--bg-primary)",
-        border: `1px solid ${card.color ? card.color + "40" : "var(--border-color)"}`,
-        borderLeft: card.color ? `3px solid ${card.color}` : undefined,
+        backgroundColor: "var(--card-bg)",
+        border: "1px solid var(--border-color)",
+        borderLeft: card.color ? `3px solid ${card.color}` : "3px solid transparent",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.02)",
       }}
     >
       <p className="text-[12px] font-light leading-snug" style={{ color: "var(--text-primary)" }}>
         {card.title || "Untitled"}
       </p>
       {card.description && (
-        <p className="text-[10px] mt-1 line-clamp-2" style={{ color: "var(--text-muted)" }}>
+        <p className="text-[10px] mt-1.5 line-clamp-2 leading-relaxed" style={{ color: "var(--text-muted)" }}>
           {card.description}
         </p>
       )}
       {(cardTags.length > 0 || card.scheduledAt) && (
-        <div className="flex flex-wrap gap-1 mt-2">
+        <div className="flex flex-wrap items-center gap-1 mt-2">
           {cardTags.map((t) => <TagPill key={t.id} tag={t} />)}
           {card.scheduledAt && (
-            <span className="text-[9px] font-mono" style={{ color: "var(--text-muted)" }}>
+            <span className="text-[9px] font-mono tabular-nums" style={{ color: "var(--text-muted)" }}>
               {new Date(card.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             </span>
           )}
@@ -77,6 +78,7 @@ function ColumnView({
   column,
   cards,
   tags,
+  totalBoardCards,
   onRefresh,
   onOpenCard,
   dragOverColumnId,
@@ -89,6 +91,7 @@ function ColumnView({
   column: BoardColumn;
   cards: BoardCard[];
   tags: Tag[];
+  totalBoardCards: number;
   onRefresh: () => void;
   onOpenCard: (card: BoardCard) => void;
   dragOverColumnId: string | null;
@@ -111,7 +114,6 @@ function ColumnView({
       createCard(column.boardId, column.id, title);
       onRefresh();
       if (addRef.current) addRef.current.value = "";
-      // Keep input open for rapid entry
       addRef.current?.focus();
     } else {
       setAdding(false);
@@ -132,19 +134,27 @@ function ColumnView({
     }
   };
 
+  const progress = totalBoardCards > 0 ? Math.round((cards.length / totalBoardCards) * 100) : 0;
+
   return (
     <div
-      className="min-w-[280px] max-w-[300px] flex-shrink-0 flex flex-col rounded-2xl transition-colors duration-150"
+      className="w-[290px] min-w-[290px] flex-shrink-0 flex flex-col rounded-2xl transition-all duration-200 group/col"
       style={{
         backgroundColor: isDragOver ? "var(--bg-tertiary)" : "var(--bg-secondary)",
-        border: `1px solid ${isDragOver ? column.color + "40" : "var(--border-color)"}`,
+        border: `1px solid ${isDragOver ? column.color + "50" : "var(--border-color)"}`,
       }}
       onDragOver={(e) => { e.preventDefault(); onDragOverColumn(column.id, e); }}
       onDragLeave={onDragLeaveColumn}
       onDrop={(e) => { e.preventDefault(); onDropOnColumn(column.id); }}
     >
+      {/* Colored top accent */}
+      <div
+        className="h-[3px] rounded-t-2xl"
+        style={{ backgroundColor: column.color, opacity: 0.7 }}
+      />
+
       {/* Column Header */}
-      <div className="px-3 py-2.5 flex items-center gap-2">
+      <div className="px-3 py-3 flex items-center gap-2">
         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: column.color }} />
         {editingName ? (
           <input
@@ -159,32 +169,46 @@ function ColumnView({
         ) : (
           <span
             onClick={() => setEditingName(true)}
-            className="flex-1 text-[12px] font-medium cursor-default"
+            className="flex-1 text-[12px] font-medium cursor-default tracking-wide"
             style={{ color: "var(--text-primary)" }}
           >
             {column.name}
           </span>
         )}
-        <span className="text-[10px] tabular-nums" style={{ color: "var(--text-muted)" }}>
+        <span
+          className="text-[10px] tabular-nums px-1.5 py-0.5 rounded-md"
+          style={{ color: "var(--text-muted)", backgroundColor: "var(--bg-tertiary)" }}
+        >
           {cards.length}
         </span>
         <button
           onClick={handleDelete}
-          className="w-5 h-5 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity cursor-default"
+          className="w-5 h-5 rounded flex items-center justify-center opacity-0 group-hover/col:opacity-60 hover:!opacity-100 transition-opacity cursor-default"
           style={{ color: "var(--text-muted)" }}
         >
           <IconX size={10} />
         </button>
       </div>
 
+      {/* Progress bar */}
+      {totalBoardCards > 0 && (
+        <div className="px-3 pb-2">
+          <div className="h-[2px] rounded-full overflow-hidden" style={{ backgroundColor: "var(--border-color)" }}>
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${progress}%`, backgroundColor: column.color, opacity: 0.6 }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Cards */}
       <div ref={containerRef} className="flex-1 overflow-y-auto px-2 pb-2 space-y-2 min-h-[60px]" data-column-id={column.id}>
         <AnimatePresence mode="popLayout">
           {cards.map((card, i) => (
             <div key={card.id}>
-              {/* Drop indicator line */}
               {isDragOver && dropIndex === i && (
-                <div className="h-[2px] rounded-full mx-1 mb-1" style={{ backgroundColor: column.color }} />
+                <div className="h-[2px] rounded-full mx-1 mb-1.5 transition-all" style={{ backgroundColor: column.color }} />
               )}
               <CardItem
                 card={card}
@@ -197,7 +221,6 @@ function ColumnView({
               />
             </div>
           ))}
-          {/* Drop indicator at end */}
           {isDragOver && dropIndex >= cards.length && (
             <div className="h-[2px] rounded-full mx-1" style={{ backgroundColor: column.color }} />
           )}
@@ -244,6 +267,7 @@ export default function BoardDetailView({ board, onBack, onRefresh }: BoardDetai
 
   const columns = getColumnsForBoard(board.id);
   const tags = getTags();
+  const allBoardCards = getCardsForBoard(board.id);
 
   const handleRename = () => {
     const name = nameRef.current?.value.trim();
@@ -259,7 +283,6 @@ export default function BoardDetailView({ board, onBack, onRefresh }: BoardDetai
 
   const handleDragOverColumn = useCallback((colId: string, e: React.DragEvent) => {
     setDragOverCol(colId);
-    // Calculate drop index from mouse position
     const container = (e.currentTarget as HTMLElement).querySelector(`[data-column-id="${colId}"]`);
     if (!container) return;
     const cardEls = Array.from(container.children).filter((el) => !(el as HTMLElement).style.backgroundColor) as HTMLElement[];
@@ -297,7 +320,9 @@ export default function BoardDetailView({ board, onBack, onRefresh }: BoardDetai
           <IconChevron size={12} className="rotate-180" />
         </button>
 
-        <span className="text-xl">{board.icon || "📋"}</span>
+        <span className="flex-shrink-0" style={{ color: board.color }}>
+          <IconBoard size={22} strokeWidth={1.5} />
+        </span>
 
         {editingName ? (
           <input
@@ -319,6 +344,16 @@ export default function BoardDetailView({ board, onBack, onRefresh }: BoardDetai
           </h1>
         )}
 
+        {/* Stats */}
+        <div className="flex items-center gap-3 ml-4">
+          <span className="text-[10px] tabular-nums" style={{ color: "var(--text-muted)" }}>
+            {columns.length} {columns.length === 1 ? "column" : "columns"}
+          </span>
+          <span className="text-[10px] tabular-nums" style={{ color: "var(--text-muted)" }}>
+            {allBoardCards.length} {allBoardCards.length === 1 ? "card" : "cards"}
+          </span>
+        </div>
+
         <button
           onClick={handleAddColumn}
           className="ml-auto px-3 py-1.5 rounded-xl text-[11px] font-light flex items-center gap-1.5 cursor-default transition-colors"
@@ -338,6 +373,7 @@ export default function BoardDetailView({ board, onBack, onRefresh }: BoardDetai
               column={col}
               cards={getCardsForColumn(col.id)}
               tags={tags}
+              totalBoardCards={allBoardCards.length}
               onRefresh={onRefresh}
               onOpenCard={setOpenCard}
               dragOverColumnId={dragOverCol}
@@ -353,11 +389,11 @@ export default function BoardDetailView({ board, onBack, onRefresh }: BoardDetai
             <div className="flex items-center justify-center w-full">
               <button
                 onClick={handleAddColumn}
-                className="px-6 py-3 rounded-2xl text-[13px] font-light cursor-default"
+                className="px-8 py-4 rounded-2xl text-[13px] font-light cursor-default flex items-center gap-3 transition-all duration-150"
                 style={{ border: "1px dashed var(--border-color)", color: "var(--text-muted)" }}
               >
-                <IconPlus size={14} />
-                <span className="ml-2">Add your first column</span>
+                <IconPlus size={16} />
+                <span>Add your first column</span>
               </button>
             </div>
           )}
@@ -372,7 +408,6 @@ export default function BoardDetailView({ board, onBack, onRefresh }: BoardDetai
             columns={columns}
             onClose={() => { setOpenCard(null); onRefresh(); }}
             onRefresh={() => {
-              // Re-fetch the card
               const updated = getCardsForBoard(board.id).find((c) => c.id === openCard.id);
               if (updated) setOpenCard(updated);
               onRefresh();

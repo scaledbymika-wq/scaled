@@ -4,6 +4,7 @@ import type { Note, Workspace, Board } from "../lib/storage";
 import {
   IconSearch, IconPage, IconPlus, IconSettings, IconSun, IconMoon,
   IconFolder, IconTarget, IconExpand, IconHabit, IconSidebar, IconBoard, IconTable,
+  IconCalendar, IconFeather, isScaledIcon, renderScaledIcon,
 } from "./Icons";
 
 interface CommandPaletteProps {
@@ -19,6 +20,8 @@ interface CommandPaletteProps {
   onOpenHabitTracker: () => void;
   onOpenBoard: () => void;
   onOpenPlanner: () => void;
+  onOpenCalendar: () => void;
+  onToggleQuickNote: () => void;
   onToggleZenMode: () => void;
   onToggleSidebar: () => void;
   theme: string;
@@ -48,6 +51,8 @@ export default function CommandPalette({
   onOpenHabitTracker,
   onOpenBoard,
   onOpenPlanner,
+  onOpenCalendar,
+  onToggleQuickNote,
   onToggleZenMode,
   onToggleSidebar,
   boards,
@@ -79,6 +84,8 @@ export default function CommandPalette({
       { id: "habits", label: "Habit Tracker", sublabel: "Habits, Mood & Stats", icon: <IconHabit size={16} />, action: () => { onOpenHabitTracker(); onClose(); }, category: "Views" },
       { id: "board", label: "Board", sublabel: "Kanban Board", icon: <IconBoard size={16} />, action: () => { onOpenBoard(); onClose(); }, category: "Views" },
       { id: "planner", label: "Planner", sublabel: "Table with Tags & Schedule", icon: <IconTable size={16} />, action: () => { onOpenPlanner(); onClose(); }, category: "Views" },
+      { id: "calendar", label: "Calendar", sublabel: "Monthly overview", icon: <IconCalendar size={16} />, action: () => { onOpenCalendar(); onClose(); }, category: "Views" },
+      { id: "quicknote", label: "Quick Note", sublabel: "Cmd+J", icon: <IconFeather size={16} />, action: () => { onToggleQuickNote(); onClose(); }, category: "Actions" },
       { id: "zen", label: "Zen Mode", sublabel: "Distraction-free", icon: <IconExpand size={16} />, action: () => { onToggleZenMode(); onClose(); }, category: "Actions" },
       { id: "sidebar", label: "Toggle Sidebar", sublabel: "Cmd+\\", icon: <IconSidebar size={16} />, action: () => { onToggleSidebar(); onClose(); }, category: "Actions" },
     );
@@ -102,7 +109,9 @@ export default function CommandPalette({
         id: `board-${board.id}`,
         label: board.name,
         sublabel: "Board",
-        icon: <span className="text-sm">{board.icon || "📋"}</span>,
+        icon: board.icon && isScaledIcon(board.icon)
+          ? renderScaledIcon(board.icon, { size: 16 })
+          : <IconBoard size={16} />,
         action: () => { onSelectBoard(board.id); onClose(); },
         category: "Boards",
       });
@@ -120,7 +129,7 @@ export default function CommandPalette({
     });
 
     return items;
-  }, [notes, workspaces, boards, theme, onCreatePage, onOpenSettings, onToggleTheme, onToggleFocusTimer, onOpenHabitTracker, onOpenBoard, onOpenPlanner, onToggleZenMode, onToggleSidebar, onSelectNote, onSelectBoard, onClose]);
+  }, [notes, workspaces, boards, theme, onCreatePage, onOpenSettings, onToggleTheme, onToggleFocusTimer, onOpenHabitTracker, onOpenBoard, onOpenPlanner, onOpenCalendar, onToggleQuickNote, onToggleZenMode, onToggleSidebar, onSelectNote, onSelectBoard, onClose]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;

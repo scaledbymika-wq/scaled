@@ -5,6 +5,8 @@ import {
   IconSearch, IconPlus, IconChevron, IconSettings,
   IconStar, IconStarFilled, IconTrash, IconPage, IconPages,
   IconFolder, IconFolderPlus, IconX, IconRestore, IconPen, IconSidebar,
+  IconCalendar, IconTable, IconBoard, IconGrid, ScaledLogo,
+  isScaledIcon, renderScaledIcon,
 } from "./Icons";
 
 interface SidebarProps {
@@ -32,6 +34,8 @@ interface SidebarProps {
   activeBoardId: string | null;
   onSelectBoard: (id: string) => void;
   onOpenBoardList: () => void;
+  activeView: string;
+  onViewChange: (view: string) => void;
 }
 
 function formatDate(ts: number) {
@@ -98,6 +102,41 @@ function CollapsibleSection({
   );
 }
 
+function NavButton({
+  icon,
+  label,
+  active,
+  onClick,
+  badge,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  badge?: number;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-left px-3 py-1.5 rounded-xl mb-px cursor-default transition-all duration-100 flex items-center gap-2.5"
+      style={{
+        backgroundColor: active ? "var(--bg-hover)" : "transparent",
+        color: active ? "var(--text-primary)" : "var(--text-secondary)",
+      }}
+    >
+      <span className="flex-shrink-0 opacity-70" style={{ color: active ? "var(--text-primary)" : "var(--text-muted)" }}>
+        {icon}
+      </span>
+      <span className="text-[12px] font-light flex-1">{label}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className="text-[9px] tabular-nums px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-tertiary)", color: "var(--text-muted)" }}>
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
 function NoteItem({
   note,
   isActive,
@@ -128,7 +167,13 @@ function NoteItem({
         }}
       >
         {note.icon ? (
-          <span className="text-[13px] flex-shrink-0">{note.icon}</span>
+          isScaledIcon(note.icon) ? (
+            <span className="flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+              {renderScaledIcon(note.icon, { size: 14, strokeWidth: 1.5 })}
+            </span>
+          ) : (
+            <span className="text-[13px] flex-shrink-0">{note.icon}</span>
+          )
         ) : (
           <span style={{ color: "var(--text-muted)" }} className="flex-shrink-0">
             <IconPage size={14} strokeWidth={1.5} />
@@ -185,6 +230,8 @@ export default function Sidebar({
   activeBoardId,
   onSelectBoard,
   onOpenBoardList,
+  activeView,
+  onViewChange,
 }: SidebarProps) {
   const [creatingWs, setCreatingWs] = useState(false);
   const wsInputRef = useRef<HTMLInputElement>(null);
@@ -212,9 +259,14 @@ export default function Sidebar({
 
       {/* Brand + Controls */}
       <div className="px-4 pb-3 flex items-center justify-between">
-        <h1 className="font-serif italic text-[20px] font-light tracking-tight" style={{ color: "var(--text-primary)" }}>
-          Scaled.
-        </h1>
+        <div className="flex items-center gap-2">
+          <span style={{ color: "#10b981" }}>
+            <ScaledLogo size={18} />
+          </span>
+          <h1 className="font-serif italic text-[18px] font-light tracking-tight" style={{ color: "var(--text-primary)" }}>
+            Scaled.
+          </h1>
+        </div>
         <div className="flex items-center gap-0.5">
           <button
             onClick={onOpenSettings}
@@ -273,6 +325,32 @@ export default function Sidebar({
 
       {/* Content */}
       <nav className="flex-1 overflow-y-auto px-2">
+
+        {/* Navigation — always visible */}
+        <div className="mb-2 space-y-px">
+          <NavButton
+            icon={<IconCalendar size={15} />}
+            label="Calendar"
+            active={activeView === "calendar"}
+            onClick={() => onViewChange("calendar")}
+          />
+          <NavButton
+            icon={<IconTable size={15} />}
+            label="Planner"
+            active={activeView === "planner"}
+            onClick={() => onViewChange("planner")}
+          />
+          <NavButton
+            icon={<IconGrid size={15} />}
+            label="Boards"
+            active={activeView === "boards"}
+            onClick={onOpenBoardList}
+            badge={boards.length}
+          />
+        </div>
+
+        <div className="mx-3 mb-2" style={{ borderTop: "1px solid var(--border-color)" }} />
+
         {/* Workspaces — only show when multiple exist */}
         {workspaces.length > 0 && (
           <div className="mb-1">
@@ -372,7 +450,11 @@ export default function Sidebar({
                   color: activeBoardId === board.id ? "var(--text-primary)" : "var(--text-secondary)",
                 }}
               >
-                <span className="text-[12px] flex-shrink-0">{board.icon || "📋"}</span>
+                <span className="flex-shrink-0" style={{ color: board.color + "cc" }}>
+                  {board.icon && isScaledIcon(board.icon)
+                    ? renderScaledIcon(board.icon, { size: 14, strokeWidth: 1.5 })
+                    : <IconBoard size={14} strokeWidth={1.5} />}
+                </span>
                 <span className="text-[12px] font-light truncate flex-1">{board.name}</span>
                 <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: board.color }} />
               </button>

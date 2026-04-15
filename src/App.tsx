@@ -12,6 +12,8 @@ import HabitTracker from "./components/HabitTracker";
 import BoardListView from "./components/BoardListView";
 import BoardDetailView from "./components/BoardDetailView";
 import PlannerView from "./components/PlannerView";
+import CalendarView from "./components/CalendarView";
+import QuickNote from "./components/QuickNote";
 import { useTheme } from "./lib/theme";
 import {
   getNotes,
@@ -48,11 +50,12 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showFocusTimer, setShowFocusTimer] = useState(false);
+  const [showQuickNote, setShowQuickNote] = useState(false);
   const [activeWorkspace, setActiveWorkspace] = useState("");
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [zenMode, setZenMode] = useState(false);
-  const [activeView, setActiveView] = useState("pages"); // "pages" | "habits" | "boards" | "board:{id}" | "planner"
+  const [activeView, setActiveView] = useState("pages"); // "pages" | "habits" | "boards" | "board:{id}" | "planner" | "calendar"
   const [boards, setBoards] = useState<Board[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const { settings, theme, setTheme } = useTheme();
@@ -237,6 +240,10 @@ export default function App() {
         e.preventDefault();
         setShowSettings((s) => !s);
       }
+      if (e.metaKey && e.key === "j") {
+        e.preventDefault();
+        setShowQuickNote((s) => !s);
+      }
       if (e.metaKey && e.key === "\\") {
         e.preventDefault();
         setSidebarCollapsed((s) => !s);
@@ -246,12 +253,13 @@ export default function App() {
         if (showCommandPalette) { setShowCommandPalette(false); return; }
         if (showTemplatePicker) { setShowTemplatePicker(false); return; }
         if (showSettings) { setShowSettings(false); return; }
+        if (showQuickNote) { setShowQuickNote(false); return; }
         if (showFocusTimer) { setShowFocusTimer(false); return; }
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [handleNewPage, showTemplatePicker, showSettings, showCommandPalette, showFocusTimer, zenMode]);
+  }, [handleNewPage, showTemplatePicker, showSettings, showCommandPalette, showFocusTimer, showQuickNote, zenMode]);
 
   // Word + char count for active note
   const textStats = useMemo(() => {
@@ -350,6 +358,8 @@ export default function App() {
               activeBoardId={activeView.startsWith("board:") ? activeView.slice(6) : null}
               onSelectBoard={(id) => setActiveView(`board:${id}`)}
               onOpenBoardList={() => setActiveView("boards")}
+              activeView={activeView}
+              onViewChange={setActiveView}
             />
           </motion.div>
         )}
@@ -404,6 +414,11 @@ export default function App() {
         ) : activeView === "planner" ? (
           <PlannerView
             onOpenBoard={(id) => setActiveView(`board:${id}`)}
+          />
+        ) : activeView === "calendar" ? (
+          <CalendarView
+            onOpenBoard={(id) => setActiveView(`board:${id}`)}
+            onSelectNote={(id) => { setActiveId(id); setActiveView("pages"); }}
           />
         ) : (
           <>
@@ -491,6 +506,8 @@ export default function App() {
         onOpenHabitTracker={() => setActiveView("habits")}
         onOpenBoard={() => setActiveView("boards")}
         onOpenPlanner={() => setActiveView("planner")}
+        onOpenCalendar={() => setActiveView("calendar")}
+        onToggleQuickNote={() => setShowQuickNote((s) => !s)}
         boards={boards}
         onSelectBoard={(id) => setActiveView(`board:${id}`)}
         onToggleZenMode={() => setZenMode(true)}
@@ -501,6 +518,18 @@ export default function App() {
       <FocusTimer
         open={showFocusTimer}
         onClose={() => setShowFocusTimer(false)}
+      />
+
+      <QuickNote
+        open={showQuickNote}
+        onClose={() => setShowQuickNote(false)}
+        onCreatePage={(content) => {
+          const note = createNote(null, activeWorkspace);
+          updateNote(note.id, { content: `<p>${content.replace(/\n/g, "</p><p>")}</p>` });
+          refresh();
+          setActiveId(note.id);
+          setActiveView("pages");
+        }}
       />
 
       <UpdateDialog />

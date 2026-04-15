@@ -24,6 +24,7 @@ import FloatingToolbar from "./FloatingToolbar";
 import BlockMenu from "./BlockMenu";
 import { fileToDataUrl } from "../lib/storage";
 import { useTheme } from "../lib/theme";
+import { SCALED_ICON_NAMES, renderScaledIcon, isScaledIcon } from "./Icons";
 
 const lowlight = createLowlight(common);
 
@@ -230,12 +231,8 @@ export default function Editor({
     };
   }, []);
 
-  const EMOJI_LIST = [
-    "\ud83d\udcdd", "\ud83d\ude80", "\ud83d\udca1", "\ud83c\udfaf", "\ud83d\udd25",
-    "\u2b50", "\ud83d\udcda", "\ud83d\udee0\ufe0f", "\ud83c\udf1f", "\ud83d\udcbc",
-    "\ud83d\udcac", "\ud83c\udf10", "\ud83d\udd12", "\u2705", "\ud83d\udcc8",
-    "\ud83d\udce6", "\ud83c\udfa8", "\u26a1", "\ud83d\udd2e", "\ud83e\udde0",
-  ];
+  // Custom icon names for the icon picker (no emojis)
+  const ICON_LIST = SCALED_ICON_NAMES;
 
   return (
     <div className="flex-1 h-full overflow-y-auto">
@@ -289,7 +286,7 @@ export default function Editor({
         <div className="flex items-center gap-2 mb-4 opacity-0 hover:opacity-100 transition-opacity duration-300">
           <button
             onClick={() => {
-              const picked = EMOJI_LIST[Math.floor(Math.random() * EMOJI_LIST.length)];
+              const picked = `icon:${ICON_LIST[Math.floor(Math.random() * ICON_LIST.length)]}`;
               onIconChange(icon ? "" : picked);
             }}
             className="px-2 py-1 text-[11px] border border-transparent rounded transition-all"
@@ -312,12 +309,18 @@ export default function Editor({
         {icon && (
           <button
             onClick={() => {
-              const picked = EMOJI_LIST[Math.floor(Math.random() * EMOJI_LIST.length)];
+              const picked = `icon:${ICON_LIST[Math.floor(Math.random() * ICON_LIST.length)]}`;
               onIconChange(picked);
             }}
-            className="text-5xl mb-4 hover:scale-110 transition-transform cursor-default"
+            className="mb-4 hover:scale-110 transition-transform cursor-default"
           >
-            {icon}
+            {isScaledIcon(icon) ? (
+              <span style={{ color: "#10b981" }}>
+                {renderScaledIcon(icon, { size: 40, strokeWidth: 1.2 })}
+              </span>
+            ) : (
+              <span className="text-5xl">{icon}</span>
+            )}
           </button>
         )}
 

@@ -260,6 +260,149 @@ export function IconBoard(p: IconProps) {
   return <I {...p}><rect x="3" y="3" width="5" height="18" rx="1" /><rect x="10" y="3" width="5" height="12" rx="1" /><rect x="17" y="3" width="5" height="15" rx="1" /></I>;
 }
 
+// — Feature Icons —
+
+export function IconCalendar(p: IconProps) {
+  return <I {...p}><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></I>;
+}
+
+export function IconExport(p: IconProps) {
+  return <I {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></I>;
+}
+
+export function IconCopy(p: IconProps) {
+  return <I {...p}><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></I>;
+}
+
+export function IconClock(p: IconProps) {
+  return <I {...p}><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></I>;
+}
+
+export function IconHash(p: IconProps) {
+  return <I {...p}><line x1="4" y1="9" x2="20" y2="9" /><line x1="4" y1="15" x2="20" y2="15" /><line x1="10" y1="3" x2="8" y2="21" /><line x1="16" y1="3" x2="14" y2="21" /></I>;
+}
+
+export function IconInbox(p: IconProps) {
+  return <I {...p}><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></I>;
+}
+
+export function IconBookmark(p: IconProps) {
+  return <I {...p}><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" /></I>;
+}
+
+export function IconHeart(p: IconProps) {
+  return <I {...p}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></I>;
+}
+
+export function IconGlobe(p: IconProps) {
+  return <I {...p}><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></I>;
+}
+
+export function IconFlag(p: IconProps) {
+  return <I {...p}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></I>;
+}
+
+export function IconLayers(p: IconProps) {
+  return <I {...p}><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></I>;
+}
+
+export function IconGrid(p: IconProps) {
+  return <I {...p}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></I>;
+}
+
+export function IconArchive(p: IconProps) {
+  return <I {...p}><polyline points="21 8 21 21 3 21 3 8" /><rect x="1" y="3" width="22" height="5" rx="1" /><line x1="10" y1="12" x2="14" y2="12" /></I>;
+}
+
+export function IconFeather(p: IconProps) {
+  return <I {...p}><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" /><line x1="16" y1="8" x2="2" y2="22" /><line x1="17.5" y1="15" x2="9" y2="15" /></I>;
+}
+
+export function IconMusic(p: IconProps) {
+  return <I {...p}><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></I>;
+}
+
+export function IconCamera(p: IconProps) {
+  return <I {...p}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></I>;
+}
+
+export function IconZap(p: IconProps) {
+  return <I {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></I>;
+}
+
+export function IconCompass(p: IconProps) {
+  return <I {...p}><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></I>;
+}
+
+export function IconUsers(p: IconProps) {
+  return <I {...p}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></I>;
+}
+
+export function IconBriefcase(p: IconProps) {
+  return <I {...p}><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /></I>;
+}
+
+export function IconCoffee(p: IconProps) {
+  return <I {...p}><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></I>;
+}
+
+export function IconWind(p: IconProps) {
+  return <I {...p}><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" /></I>;
+}
+
+// — Brand Mark (Scaled "S" lightning bolt) —
+
+export function ScaledLogo({ size = 20, className }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="M13.5 2L4 13h6.5l-1 9L20 11h-6.5l1-9z"
+        fill="currentColor"
+        fillOpacity="0.85"
+      />
+    </svg>
+  );
+}
+
+// — Custom Icon System (replaces emojis) —
+
+export const SCALED_ICON_NAMES = [
+  "page", "rocket", "target", "chart", "zap", "sparkle",
+  "pen", "palette", "journal", "heart", "flag", "globe",
+  "hash", "clock", "bookmark", "layers", "grid", "inbox",
+  "archive", "feather", "music", "camera", "compass", "board",
+  "users", "briefcase", "coffee", "wind", "star", "code",
+] as const;
+
+export type ScaledIconName = (typeof SCALED_ICON_NAMES)[number];
+
+const ICON_MAP: Record<string, (p: IconProps) => React.ReactElement> = {
+  page: IconPage, rocket: IconRocket, target: IconTarget, chart: IconChart,
+  zap: IconZap, sparkle: IconSparkle, pen: IconPen, palette: IconPalette,
+  journal: IconJournal, heart: IconHeart, flag: IconFlag, globe: IconGlobe,
+  hash: IconHash, clock: IconClock, bookmark: IconBookmark, layers: IconLayers,
+  grid: IconGrid, inbox: IconInbox, archive: IconArchive, feather: IconFeather,
+  music: IconMusic, camera: IconCamera, compass: IconCompass, board: IconBoard,
+  users: IconUsers, briefcase: IconBriefcase, coffee: IconCoffee, wind: IconWind,
+  star: IconStar, code: IconCode,
+};
+
+/** Render a custom Scaled icon by name. Returns null if unknown. */
+export function renderScaledIcon(iconStr: string, props?: IconProps): React.ReactElement | null {
+  // Icon strings stored as "icon:name" to distinguish from emoji
+  const name = iconStr.startsWith("icon:") ? iconStr.slice(5) : iconStr;
+  const Component = ICON_MAP[name];
+  if (Component) return <Component {...(props || {})} />;
+  return null;
+}
+
+/** Check whether the icon string is a custom Scaled icon. */
+export function isScaledIcon(icon: string): boolean {
+  if (!icon) return false;
+  const name = icon.startsWith("icon:") ? icon.slice(5) : icon;
+  return name in ICON_MAP;
+}
+
 // — Mood Faces —
 
 export function IconMoodAwful(p: IconProps) {

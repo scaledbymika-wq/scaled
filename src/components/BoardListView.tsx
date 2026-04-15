@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Board } from "../lib/storage";
 import { getColumnsForBoard, getCardsForBoard, createBoard, deleteBoard } from "../lib/storage";
-import { IconPlus, IconTrash } from "./Icons";
+import { IconPlus, IconTrash, IconBoard, isScaledIcon, renderScaledIcon } from "./Icons";
 
 interface BoardListViewProps {
   boards: Board[];
@@ -69,7 +69,11 @@ export default function BoardListView({ boards, onSelectBoard, onRefresh }: Boar
                   <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ backgroundColor: board.color }} />
 
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-xl">{board.icon || "📋"}</span>
+                    <span style={{ color: board.color }}>
+                      {board.icon && isScaledIcon(board.icon)
+                        ? renderScaledIcon(board.icon, { size: 20, strokeWidth: 1.5 })
+                        : <IconBoard size={20} strokeWidth={1.5} />}
+                    </span>
                     <h3 className="text-[15px] font-light" style={{ color: "var(--text-primary)" }}>
                       {board.name}
                     </h3>
